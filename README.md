@@ -1,6 +1,6 @@
 # ClientMigration
 
-Specialiseringsbeskrivning: 
+## Specialiseringsbeskrivning: 
 
 Målet är att bygga upp en klient och serverstruktur med möjlighet för att migrera klienter mellan servarinstanser i prestanda balanseringssyfte.
 
