@@ -16,7 +16,7 @@ Om även mer tid finns Vill jag koppla servrarnas uppmätta ’hälsa’ och bel
 
 ## Tidsplanering: 
 
-__09/03 måndag:__	Planera upp specialiseringen
+~__09/03 måndag:__	Planera upp specialiseringen~
 
 __10/03 tisdag:__	Rensa upp nuvarande projekt och extrahera simpel klient-server
 
