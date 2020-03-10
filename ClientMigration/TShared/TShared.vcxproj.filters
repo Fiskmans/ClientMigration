@@ -4,6 +4,12 @@
     <Filter Include="PrecompiledHeader">
       <UniqueIdentifier>{83c467ed-fb37-4d04-baab-e837ffd1c636}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MessageTypes">
+      <UniqueIdentifier>{19412f2d-9075-4a04-87c9-bdba43598d14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{92a003d0-93c0-444e-a6e8-a62d8e3a0dd5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -13,41 +19,60 @@
       <Filter>PrecompiledHeader</Filter>
     </ClInclude>
     <ClInclude Include="CommonNetworkIncludes.h" />
-    <ClInclude Include="CommonErrorHandling.h" />
-    <ClInclude Include="NetMessage.h" />
-    <ClInclude Include="SetupMessage.h" />
-    <ClInclude Include="ChatMessage.h" />
-    <ClInclude Include="StatusMessage.h" />
-    <ClInclude Include="MoveMessage.h" />
-    <ClInclude Include="AllNetMesseges.h" />
     <ClInclude Include="NetworkInterface.h" />
-    <ClInclude Include="TimeHelper.h" />
-    <ClInclude Include="NetPackResponse.h" />
-    <ClInclude Include="SharedBall.h" />
-    <ClInclude Include="Macros.h" />
-    <ClInclude Include="Random.h" />
-    <ClInclude Include="Vector.hpp" />
-    <ClInclude Include="Vector2.hpp" />
-    <ClInclude Include="Vector3.hpp" />
-    <ClInclude Include="Vector4.hpp" />
-    <ClInclude Include="FiskFTP.h" />
-    <ClInclude Include="BigFileMessage.h" />
+    <ClInclude Include="BigFileMessage.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="AllNetMesseges.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="NetMessage.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="NetPackResponse.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SetupMessage.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusMessage.h">
+      <Filter>MessageTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Random.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Precompiled\pch.h" />
+    <ClInclude Include="..\Precompiled\Macros.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>PrecompiledHeader</Filter>
     </ClCompile>
-    <ClCompile Include="NetMessage.cpp" />
-    <ClCompile Include="SetupMessage.cpp" />
-    <ClCompile Include="ChatMessage.cpp" />
-    <ClCompile Include="StatusMessage.cpp" />
-    <ClCompile Include="MoveMessage.cpp" />
     <ClCompile Include="NetworkInterface.cpp" />
-    <ClCompile Include="TimeHelper.cpp" />
-    <ClCompile Include="NetPackResponse.cpp" />
-    <ClCompile Include="SharedBall.cpp" />
-    <ClCompile Include="Random.cpp" />
-    <ClCompile Include="FiskFTP.cpp" />
-    <ClCompile Include="BigFileMessage.cpp" />
+    <ClCompile Include="BigFileMessage.cpp">
+      <Filter>MessageTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="NetMessage.cpp">
+      <Filter>MessageTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="NetPackResponse.cpp">
+      <Filter>MessageTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupMessage.cpp">
+      <Filter>MessageTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusMessage.cpp">
+      <Filter>MessageTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="Random.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Precompiled\pch.cpp" />
   </ItemGroup>
 </Project>

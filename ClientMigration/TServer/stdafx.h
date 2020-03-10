@@ -11,8 +11,6 @@
 #include <tchar.h>
 #include <CommonErrorHandling.h>
 
-#define BUFLEN 576	//Max length of buffer
-#define MAXUSERNAMELENGTH 128
 
 
 

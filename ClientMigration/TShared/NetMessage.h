@@ -11,8 +11,6 @@ public:
 	{
 		Invalid,
 		Setup,
-		Chat,
-		Move,
 		Status,
 		PackageResponse,
 		BigFile

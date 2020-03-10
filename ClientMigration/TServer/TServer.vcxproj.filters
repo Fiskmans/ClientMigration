@@ -18,21 +18,16 @@
     <ClInclude Include="stdafx.h">
       <Filter>PrecompiledHeader</Filter>
     </ClInclude>
-    <ClInclude Include="ServerMainInteface.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="ServerMain.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="Connection.h" />
-    <ClInclude Include="ServerBall.h" />
+    <ClInclude Include="..\Precompiled\Macros.h" />
+    <ClInclude Include="..\Precompiled\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>PrecompiledHeader</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerMainInteface.cpp">
-      <Filter>Interfaces</Filter>
     </ClCompile>
     <ClCompile Include="ServerMain.cpp">
       <Filter>Server</Filter>
@@ -41,6 +36,6 @@
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="Connection.cpp" />
-    <ClCompile Include="ServerBall.cpp" />
+    <ClCompile Include="..\Precompiled\pch.cpp" />
   </ItemGroup>
 </Project>

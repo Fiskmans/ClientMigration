@@ -16,11 +16,14 @@
       <Filter>PrecompiledHeader</Filter>
     </ClInclude>
     <ClInclude Include="TClient.h" />
+    <ClInclude Include="..\Precompiled\Macros.h" />
+    <ClInclude Include="..\Precompiled\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>PrecompiledHeader</Filter>
     </ClCompile>
     <ClCompile Include="TClient.cpp" />
+    <ClCompile Include="..\Precompiled\pch.cpp" />
   </ItemGroup>
 </Project>

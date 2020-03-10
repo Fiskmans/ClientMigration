@@ -1,9 +1,7 @@
-#include "stdafx.h"
+#include <pch.h>
 #include "Connection.h"
 #include <SetupMessage.h>
-#include <ChatMessage.h>
 #include <StatusMessage.h>
-#include <MoveMessage.h>
 #include <StatusMessage.h>
 
 
@@ -63,10 +61,6 @@ void Connection::Invalidate()
 	NetworkInterface::Clear();
 }
 
-char Connection::Distance(const StatusMessage* aMessage)
-{
-	return max(abs(myPosition[0]*3.f-aMessage->myVector.x*3.f),abs(myPosition[1] * 3.f - aMessage->myVector.y * 3.f));
-}
 
 
 unsigned short Connection::GetID()
@@ -155,18 +149,6 @@ void Connection::Parse(char* aData, int aAmount)
 	NetMessage* netMess = reinterpret_cast<NetMessage*>(aData);
 	switch (netMess->myType)
 	{
-	case NetMessage::Type::Chat:
-		if (aAmount != sizeof(ChatMessage))
-		{
-			std::cout << myConnectedUser << " Chatmessage struct was not the right size expected [" + std::to_string(sizeof(ChatMessage)) + "] got [" + std::to_string(aAmount) + "]\n";
-			myIsValid = false;
-		}
-		{
-			ChatMessage* message = reinterpret_cast<ChatMessage*>(aData);
-			message->mySender = myID;
-			myCallbackFunction(*message);
-		}
-		break;
 	case NetMessage::Type::Status:
 		{
 		StatusMessage* status = reinterpret_cast<StatusMessage*>(aData);
@@ -180,23 +162,6 @@ void Connection::Parse(char* aData, int aAmount)
 			myIsValid = false;
 		}
 		}
-		break;
-	case NetMessage::Type::Move:
-	{
-		MoveMessage* move = reinterpret_cast<MoveMessage*>(aData);
-		if (Evaluate(move))
-		{
-			move->myTarget = myID; //Spoof protection
-			myCallbackFunction(*move);
-			myPosition[0] = move->myPosition[0];
-			myPosition[1] = move->myPosition[1];
-		}
-		else
-		{
-			std::cout << myConnectedUser << " behaved badly and was kicked. sent invalid move message\n";
-			myIsValid = false;
-		}
-	}
 		break;
 	case NetMessage::Type::Invalid:
 	case NetMessage::Type::Setup:

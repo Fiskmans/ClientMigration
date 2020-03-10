@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <pch.h>
 #include "StatusMessage.h"
 
 void StatusMessage::SetName(const std::string& aName)

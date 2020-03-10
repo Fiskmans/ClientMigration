@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <pch.h>
 #include "TClient.h"
 #include <iostream>
 #include <string>
@@ -6,7 +6,6 @@
 #include <thread>
 #include <chrono>
 #include <functional>
-#include <ChatMessage.h>
 #include <StatusMessage.h>
 #include "TimeHelper.h"
 
@@ -111,11 +110,11 @@ void NetworkClient::Connect()
 	myTargetAddress.sin_family = AF_INET;
 	myTargetAddress.sin_port = htons(SERVERPORT);
 
-	std::future<std::variant<int, std::string>> selectedServer = std::async(&NetworkClient::SelectServer,this);
-	while (!selectedServer.valid())
-	{
-		std::this_thread::yield();
-	}
+	//std::future<std::variant<int, std::string>> selectedServer = std::async(&NetworkClient::SelectServer,this);
+	//while (!selectedServer.valid())
+	//{
+	//	std::this_thread::yield();
+	//}
 
 
 	u_long mode = 1;  // 1 to enable non-blocking socket
@@ -136,11 +135,11 @@ void NetworkClient::Connect()
 		return;
 	}
 
-	using namespace std::chrono_literals;
-	while (selectedServer.wait_for(0ms) != std::future_status::ready)
-	{
-		Flush();
-	}
+	//using namespace std::chrono_literals;
+	//while (selectedServer.wait_for(0ms) != std::future_status::ready)
+	//{
+	//	Flush();
+	//}
 
 
 	std::string address;
@@ -389,14 +388,6 @@ void NetworkClient::Receive(char* someData, const int aDataSize)
 			std::cout << "Connection invalidated!\n";
 			std::cout << "Reconnecting\n";
 			HandShake();
-		}
-		else if (netMess->myType == NetMessage::Type::Status && reinterpret_cast<StatusMessage*>(someData)->myStatus == StatusMessage::Status::ServerExists)
-		{
-			std::lock_guard lock(myServerMutex);
-			char addbuf[INET_ADDRSTRLEN];
-			inet_ntop(AF_INET, &myRecievedAddress.sin_addr, addbuf, INET_ADDRSTRLEN);
-			InsertLine("[" + std::to_string(myServers.size()) + "] " + addbuf);
-			myServers.push_back(myRecievedAddress);
 		}
 		else if (myCallback)
 		{

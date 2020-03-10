@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <pch.h>
 #include "NetworkInterface.h"
 #include <string>
 #include "TimeHelper.h"

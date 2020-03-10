@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <pch.h>
 #include "BigFileMessage.h"
 #include "NetworkInterface.h"
 #include <iostream>

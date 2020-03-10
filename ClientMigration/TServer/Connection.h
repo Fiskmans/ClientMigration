@@ -1,7 +1,6 @@
 #pragma once
 #include <CommonNetworkIncludes.h>
 #include <functional>
-#include <ChatMessage.h>
 #include <NetworkInterface.h>
 
 class MoveMessage;
@@ -20,8 +19,6 @@ public:
 	void Send(const char* aData,int aDataSize) override;
 	void Receive(char* someData, const int aDataSize) override;
 	void Invalidate();
-
-	char Distance(const StatusMessage* aMessage);
 
 	unsigned short GetID();
 	std::string GetName();
