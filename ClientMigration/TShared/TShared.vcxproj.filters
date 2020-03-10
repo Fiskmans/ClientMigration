@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PrecompiledHeader">
+      <UniqueIdentifier>{83c467ed-fb37-4d04-baab-e837ffd1c636}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>PrecompiledHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>PrecompiledHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonNetworkIncludes.h" />
+    <ClInclude Include="CommonErrorHandling.h" />
+    <ClInclude Include="NetMessage.h" />
+    <ClInclude Include="SetupMessage.h" />
+    <ClInclude Include="ChatMessage.h" />
+    <ClInclude Include="StatusMessage.h" />
+    <ClInclude Include="MoveMessage.h" />
+    <ClInclude Include="AllNetMesseges.h" />
+    <ClInclude Include="NetworkInterface.h" />
+    <ClInclude Include="TimeHelper.h" />
+    <ClInclude Include="NetPackResponse.h" />
+    <ClInclude Include="SharedBall.h" />
+    <ClInclude Include="Macros.h" />
+    <ClInclude Include="Random.h" />
+    <ClInclude Include="Vector.hpp" />
+    <ClInclude Include="Vector2.hpp" />
+    <ClInclude Include="Vector3.hpp" />
+    <ClInclude Include="Vector4.hpp" />
+    <ClInclude Include="FiskFTP.h" />
+    <ClInclude Include="BigFileMessage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PrecompiledHeader</Filter>
+    </ClCompile>
+    <ClCompile Include="NetMessage.cpp" />
+    <ClCompile Include="SetupMessage.cpp" />
+    <ClCompile Include="ChatMessage.cpp" />
+    <ClCompile Include="StatusMessage.cpp" />
+    <ClCompile Include="MoveMessage.cpp" />
+    <ClCompile Include="NetworkInterface.cpp" />
+    <ClCompile Include="TimeHelper.cpp" />
+    <ClCompile Include="NetPackResponse.cpp" />
+    <ClCompile Include="SharedBall.cpp" />
+    <ClCompile Include="Random.cpp" />
+    <ClCompile Include="FiskFTP.cpp" />
+    <ClCompile Include="BigFileMessage.cpp" />
+  </ItemGroup>
+</Project>

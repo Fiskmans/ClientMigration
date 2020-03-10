@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{79a50693-39a8-4e73-90ec-d84f88a943d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{e92cec37-b0f3-4693-8471-6afd33eac51d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PrecompiledHeader">
+      <UniqueIdentifier>{6147005b-f9f3-4e4b-b23b-b5cf0fd308b4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>PrecompiledHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>PrecompiledHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerMainInteface.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerMain.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h" />
+    <ClInclude Include="ServerBall.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PrecompiledHeader</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerMainInteface.cpp">
+      <Filter>Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerMain.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="ServerBall.cpp" />
+  </ItemGroup>
+</Project>
