@@ -40,6 +40,9 @@ private:
 	sockaddr_in myAddress;
 	int myAddressSize;
 	std::function<void(const NetMessage&)> myCallbackFunction;
+
+	// Inherited via NetworkInterface
+	virtual void TimedOut() override;
 };
 
 template<class T>

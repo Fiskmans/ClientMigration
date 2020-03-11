@@ -144,13 +144,77 @@ void NetworkClient::Connect()
 
 	std::string address;
 	std::cout << "Enter Adress: ";
-	std::getline(std::cin, address);
+	//std::getline(std::cin, address);
+	address = "server.mansandersen.com";
+	std::cout << "\n";
 	if (address.empty())
 	{
 		address = "127.0.0.1";
-		ReplaceLastLine("Enter Adress: 127.0.0.1");
 	}
-	inet_pton(AF_INET, address.c_str(), &myTargetAddress.sin_addr.S_un.S_addr);
+	ReplaceLastLine("Enter Adress: " + address);
+	if (inet_pton(AF_INET, address.c_str(), &myTargetAddress.sin_addr.S_un.S_addr) != 1)
+	{
+		struct addrinfo* ptr = NULL;
+		struct addrinfo hints;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+
+		while(true)
+		{
+			std::this_thread::yield();
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			int error = getaddrinfo(address.c_str(), NULL, &hints, &ptr);
+			if (error)
+			{
+				error = WSAGetLastError();
+				switch (error)
+				{
+				case WSAHOST_NOT_FOUND:
+					std::cout << "host not found";
+					break;
+				default:
+					std::cout << "could not get address info with error: " + std::to_string(error) + "\n";
+					break;
+				}
+			}
+			else
+			{
+				struct addrinfo* result = ptr;
+
+				while (result)
+				{
+					using namespace std::string_literals;
+					char host[256];
+					char serv[256];
+					if (getnameinfo(result->ai_addr, result->ai_addrlen, host, 256, serv, 256, 0) != NULL)
+					{
+						std::cout << "wsaerror: " + std::to_string(WSAGetLastError()) + "\n";
+					}
+					else
+					{
+						//std::cout << "host: " << host << std::endl;
+						//std::cout << "serv: " << serv << std::endl;
+						char address[INET6_ADDRSTRLEN];
+						if (inet_ntop(result->ai_family, &result->ai_addr, address, INET6_ADDRSTRLEN) != NULL)
+						{
+							std::cout << "Address: "s + address + "\t" + host + "\n";
+							memcpy(&myTargetAddress.sin_addr.S_un.S_addr, &result->ai_addr, result->ai_addrlen);
+							myTargetAddress.sin_port = htons(SERVERPORT);
+							myTargetAddress.sin_family = result->ai_family;
+						}
+						else
+						{
+							std::cout << "could not translate address\n";
+						}
+					}
+					result = result->ai_next;
+				}
+			}
+			//freeaddrinfo(ptr);
+		}
+	}
 
 	HandShake();
 
@@ -171,7 +235,7 @@ void NetworkClient::HandShake()
 	message.myStep = SetupMessage::SetupStep::Request;
 	std::cout << "Enter Username: ";
 	std::string username;
-	std::getline(std::cin, username);
+	//std::getline(std::cin, username);
 	if (!username.empty())
 	{
 		strcpy_s<MAXIDENTIFIERLENGTH>(message.myIdentifier, username.c_str());
@@ -240,6 +304,15 @@ bool NetworkClient::HandShakeAttempt(char* aData, int aDataSize)
 	return true;
 }
 
+void NetworkClient::TimedOut()
+{
+	std::cout << "Server timed out\n";
+	while (true)
+	{
+
+	}
+}
+
 
 void NetworkClient::Disconnect()
 {
@@ -279,7 +352,10 @@ void NetworkClient::Flush()
 	if (now - lastPrint > 1.f)
 	{
 		lastPrint = now;
-		std::cout << "Sent [" + std::to_string(dataCount[0]) + "] bytes\nRecived [" + std::to_string(dataCount[1]) + "] bytes\n";
+		if (dataCount[0] != 0 || dataCount[1] != 0)
+		{
+			std::cout << "Sent [" + std::to_string(dataCount[0]) + "] bytes\nRecived [" + std::to_string(dataCount[1]) + "] bytes\n";
+		}
 		dataCount[0] = 0;
 		dataCount[1] = 0;
 	}
@@ -353,7 +429,7 @@ std::variant<int, std::string> NetworkClient::SelectServer()
 		{
 			int selected = std::stoi(selection);
 			std::lock_guard lock(myServerMutex);
-			
+
 			if (selected > 0 && selected < myServers.size())
 			{
 				outp = selected;

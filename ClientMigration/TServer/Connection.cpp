@@ -171,3 +171,8 @@ void Connection::Parse(char* aData, int aAmount)
 		return;
 	}
 }
+
+void Connection::TimedOut()
+{
+	myIsValid = false;
+}

@@ -57,6 +57,9 @@ private:
 	unsigned short myId;
 	bool myIsHandshaking = false;
 	bool myIsConnected = false;
+
+	// Inherited via NetworkInterface
+	virtual void TimedOut() override;
 };
 
 template<class T>

@@ -23,10 +23,13 @@ public:
 
 	virtual void Receive(char* someData, const int aDataSize) = 0;
 	virtual void Send(const char* someData, const int aDataSize) = 0;
-	
+	virtual void TimedOut() = 0;
+
 	void PreProcessAndSend(const NetMessage* aMessage, const int aDataSize);
 	bool PreProcessReceive(char* someData, const int aDataSize);
+	
 	void Flush();
+
 
 	void Clear();
 

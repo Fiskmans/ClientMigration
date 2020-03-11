@@ -8,6 +8,7 @@
 #define RESENDTIMER 0.2f
 #define MESSAGEDUPLICATIONTIMEOUT 2.f
 #define LOGTRAFFIC false
+#define RESENDCAP 40
 
 void NetworkInterface::PreProcessAndSend(const NetMessage* aMessage, const int aDataSize)
 {
@@ -103,6 +104,10 @@ void NetworkInterface::Flush()
 	{
 		if (now - acc.lastSent > RESENDTIMER)
 		{
+			if (acc.sentCount > RESENDCAP)
+			{
+				TimedOut();
+			}
 			acc.lastSent = now;
 			Send(acc.package,acc.packageSize);
 			acc.sentCount++;
