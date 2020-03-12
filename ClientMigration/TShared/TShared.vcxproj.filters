@@ -46,6 +46,7 @@
     </ClInclude>
     <ClInclude Include="..\Precompiled\pch.h" />
     <ClInclude Include="..\Precompiled\Macros.h" />
+    <ClInclude Include="NetworkHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -74,5 +75,6 @@
       <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="..\Precompiled\pch.cpp" />
+    <ClCompile Include="NetworkHelpers.cpp" />
   </ItemGroup>
 </Project>

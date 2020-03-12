@@ -90,6 +90,7 @@
     <ClInclude Include="..\Precompiled\Macros.h" />
     <ClInclude Include="..\Precompiled\pch.h" />
     <ClInclude Include="BigFileMessage.h" />
+    <ClInclude Include="NetworkHelpers.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="CommonNetworkIncludes.h" />
     <ClInclude Include="AllNetMesseges.h" />
@@ -105,6 +106,7 @@
   <ItemGroup>
     <ClCompile Include="..\Precompiled\pch.cpp" />
     <ClCompile Include="BigFileMessage.cpp" />
+    <ClCompile Include="NetworkHelpers.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="NetMessage.cpp" />
     <ClCompile Include="NetPackResponse.cpp" />

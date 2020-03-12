@@ -45,7 +45,7 @@ private:
 	short* myPackageStart = nullptr;
 
 	SOCKET mySocket;
-	struct sockaddr_in myTargetAddress;
+	sockaddr_in myTargetAddress;
 	sockaddr_in myRecievedAddress;
 
 	void HandShake();

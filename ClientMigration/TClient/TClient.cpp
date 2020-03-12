@@ -8,6 +8,7 @@
 #include <functional>
 #include <StatusMessage.h>
 #include "TimeHelper.h"
+#include <NetworkHelpers.h>
 
 #define BUFLEN 576
 #define SERVERPORT 5763
@@ -110,17 +111,10 @@ void NetworkClient::Connect()
 	myTargetAddress.sin_family = AF_INET;
 	myTargetAddress.sin_port = htons(SERVERPORT);
 
-	//std::future<std::variant<int, std::string>> selectedServer = std::async(&NetworkClient::SelectServer,this);
-	//while (!selectedServer.valid())
-	//{
-	//	std::this_thread::yield();
-	//}
-
 
 	u_long mode = 1;  // 1 to enable non-blocking socket
 	ioctlsocket(mySocket, FIONBIO, &mode);
 
-	std::cout << "Got address info!\n";
 
 	sockaddr_in sockAddr;
 
@@ -128,94 +122,20 @@ void NetworkClient::Connect()
 	sockAddr.sin_port = htons(PORT);
 	sockAddr.sin_addr.S_un.S_addr = INADDR_ANY; // use default
 
-	//Bind
-	if (bind(mySocket, reinterpret_cast<sockaddr*>(&sockAddr), sizeof(sockAddr)))
-	{
-		std::cout << "Bind failed with error code : " + std::to_string(WSAGetLastError()) + "\n";
-		return;
-	}
-
-	//using namespace std::chrono_literals;
-	//while (selectedServer.wait_for(0ms) != std::future_status::ready)
-	//{
-	//	Flush();
-	//}
-
-
 	std::string address;
 	std::cout << "Enter Adress: ";
 	//std::getline(std::cin, address);
-	address = "server.mansandersen.com";
+	address = "127.0.0.1"; // "server.mansandersen.com";
 	std::cout << "\n";
 	if (address.empty())
 	{
 		address = "127.0.0.1";
 	}
 	ReplaceLastLine("Enter Adress: " + address);
-	if (inet_pton(AF_INET, address.c_str(), &myTargetAddress.sin_addr.S_un.S_addr) != 1)
-	{
-		struct addrinfo* ptr = NULL;
-		struct addrinfo hints;
-		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_protocol = IPPROTO_UDP;
 
-		while(true)
-		{
-			std::this_thread::yield();
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			int error = getaddrinfo(address.c_str(), NULL, &hints, &ptr);
-			if (error)
-			{
-				error = WSAGetLastError();
-				switch (error)
-				{
-				case WSAHOST_NOT_FOUND:
-					std::cout << "host not found";
-					break;
-				default:
-					std::cout << "could not get address info with error: " + std::to_string(error) + "\n";
-					break;
-				}
-			}
-			else
-			{
-				struct addrinfo* result = ptr;
-
-				while (result)
-				{
-					using namespace std::string_literals;
-					char host[256];
-					char serv[256];
-					if (getnameinfo(result->ai_addr, result->ai_addrlen, host, 256, serv, 256, 0) != NULL)
-					{
-						std::cout << "wsaerror: " + std::to_string(WSAGetLastError()) + "\n";
-					}
-					else
-					{
-						//std::cout << "host: " << host << std::endl;
-						//std::cout << "serv: " << serv << std::endl;
-						char address[INET6_ADDRSTRLEN];
-						if (inet_ntop(result->ai_family, &result->ai_addr, address, INET6_ADDRSTRLEN) != NULL)
-						{
-							std::cout << "Address: "s + address + "\t" + host + "\n";
-							memcpy(&myTargetAddress.sin_addr.S_un.S_addr, &result->ai_addr, result->ai_addrlen);
-							myTargetAddress.sin_port = htons(SERVERPORT);
-							myTargetAddress.sin_family = result->ai_family;
-						}
-						else
-						{
-							std::cout << "could not translate address\n";
-						}
-					}
-					result = result->ai_next;
-				}
-			}
-			//freeaddrinfo(ptr);
-		}
-	}
-
+	using namespace std::string_literals;
+	TranslateAddress(address, (sockaddr*)&myTargetAddress, false, [](std::string message, bool isError) { std::cout << "["s + (isError ? "Error" : "Message") + "]: " + message + "\n"; });
+	myTargetAddress.sin_port = htons(SERVERPORT);
 	HandShake();
 
 	return;
@@ -236,6 +156,7 @@ void NetworkClient::HandShake()
 	std::cout << "Enter Username: ";
 	std::string username;
 	//std::getline(std::cin, username);
+	std::cout << "\n";
 	if (!username.empty())
 	{
 		strcpy_s<MAXIDENTIFIERLENGTH>(message.myIdentifier, username.c_str());
