@@ -22,7 +22,7 @@ Om även mer tid finns Vill jag koppla servrarnas uppmätta ’hälsa’ och bel
 
 ~__11/03 onsdag:__	Få klient att koppla upp sig till servern baserad på en känd ip~
 
-__12/03 torsdag:__	~Få tag i en domän och börja undersöka vad fanken dns är~
+~__12/03 torsdag:__	Få tag i en domän och börja undersöka vad fanken dns är~
 
 __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress annars hitta ett webhotell el.dyl för att hosta en simpel redirectsida och med en kombination av LibCurl och string parsing göra det som jag tror dns gör automagiskt dvs redirecta till min hemadress~
 
