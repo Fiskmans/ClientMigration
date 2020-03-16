@@ -36,4 +36,5 @@
 //C
 #include <cassert>
 
-
+//Helpers
+#include "../TShared/EasyAssignString.h"

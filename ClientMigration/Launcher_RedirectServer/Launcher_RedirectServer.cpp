@@ -2,9 +2,11 @@
 //
 #include <pch.h>
 #include <iostream>
-#include <RedirectServer.h>
+#include <ServerMain.h>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+
+	RedirectServer server;
+	server.StartServer();
 }

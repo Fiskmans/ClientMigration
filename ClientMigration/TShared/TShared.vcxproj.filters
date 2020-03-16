@@ -47,6 +47,8 @@
     <ClInclude Include="..\Precompiled\pch.h" />
     <ClInclude Include="..\Precompiled\Macros.h" />
     <ClInclude Include="NetworkHelpers.h" />
+    <ClInclude Include="NetIdentify.h" />
+    <ClInclude Include="EasyAssignString.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -76,5 +78,7 @@
     </ClCompile>
     <ClCompile Include="..\Precompiled\pch.cpp" />
     <ClCompile Include="NetworkHelpers.cpp" />
+    <ClCompile Include="NetIdentify.cpp" />
+    <ClCompile Include="EasyAssignString.cpp" />
   </ItemGroup>
 </Project>
