@@ -199,7 +199,7 @@ void NetworkClient::HandShake()
 	}
 	std::cout << "Identifying self\n";
 	NetIdentify identify;
-	identify.myProcessType = NetIdentify::IdentificationType::IsServer;
+	identify.myProcessType = NetIdentify::IdentificationType::IsClient;
 	identify.myIsClient.myUsername = myName;
 	Send(identify);
 }

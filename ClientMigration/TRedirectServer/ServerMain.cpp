@@ -107,6 +107,8 @@ void RedirectServer::StartServer()
 	u_long mode = 1;  // 1 to enable non-blocking socket
 	ioctlsocket(mySocket, FIONBIO, &mode);
 
+	Connect();
+
 	Listen();
 
 	closesocket(mySocket);
@@ -115,6 +117,10 @@ void RedirectServer::StartServer()
 	return;
 }
 
+
+void RedirectServer::Connect()
+{
+}
 
 void RedirectServer::Listen()
 {

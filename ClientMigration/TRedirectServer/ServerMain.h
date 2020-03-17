@@ -14,11 +14,14 @@ public:
 
 private:
 
-
+	void Connect();
 	void Listen();
 	void TransmitMessage(const NetMessage& aMessage);
 
 	char myUpdateDistance = 0;
+
+	sockaddr myUpstreamAddress;
+	SOCKET myUpstreamSocket;
 
 	SOCKET mySocket;
 	std::unordered_map<std::string, Connection> myClients;
