@@ -11,6 +11,7 @@ bool NetMessage::IsImportant() const
 	case NetMessage::Type::Status:
 	case NetMessage::Type::Setup:
 	case NetMessage::Type::BigFile:
+	case NetMessage::Type::Identify:
 		return true;
 	default:
 		return false;

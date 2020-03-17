@@ -9,6 +9,7 @@
 #include <StatusMessage.h>
 #include "TimeHelper.h"
 #include <NetworkHelpers.h>
+#include <NetIdentify.h>
 
 #define BUFLEN 576
 #define SERVERPORT 5763
@@ -196,6 +197,11 @@ void NetworkClient::HandShake()
 			myIsHandshaking = false;
 		}
 	}
+	std::cout << "Identifying\n";
+	NetIdentify identify;
+	identify.myProcessType = NetIdentify::IdentificationType::IsClient;
+	identify.myIsClient.myUsername = myName;
+	Send(identify);
 }
 
 bool NetworkClient::HandShakeAttempt(char* aData, int aDataSize)
@@ -395,6 +401,22 @@ void NetworkClient::Receive(char* someData, const int aDataSize)
 			std::cout << "Connection invalidated!\n";
 			std::cout << "Reconnecting\n";
 			HandShake();
+		}
+		else if (netMess->myType == NetMessage::Type::Identify)
+		{
+			NetIdentify* ident = *netMess;
+			switch (ident->myProcessType)
+			{
+			case NetIdentify::IdentificationType::IsServer:
+				std::cout << "connected to server\n";
+				break;
+			case NetIdentify::IdentificationType::IsHost:
+				std::cout << "connected to host\n";
+				break;
+			default:
+				std::cout << "unexpected server type\n";
+				break;
+			}
 		}
 		else if (myCallback)
 		{

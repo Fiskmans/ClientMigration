@@ -170,9 +170,11 @@ void Connection::Parse(char* aData, int aAmount)
 		switch (ident->myProcessType )
 		{
 		case NetIdentify::IdentificationType::IsServer:
+			std::cout << "Server Connected\n";
 			myIsServer = true;
 			break;
 		case NetIdentify::IdentificationType::IsClient:
+			std::cout << "Client Connected\n";
 			myIsServer = false;
 			NetIdentify response;
 			response.myProcessType = NetIdentify::IdentificationType::IsServer;

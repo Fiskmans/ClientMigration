@@ -18,6 +18,6 @@ public:
 	}
 
 private:
-	char myBuffer;
+	char myBuffer[SIZE];
 };
 

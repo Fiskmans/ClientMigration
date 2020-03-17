@@ -22,6 +22,12 @@ public:
 	bool IsImportant() const;
 	char* begin();
 
+	template<class T>
+	operator T* ()
+	{
+		return reinterpret_cast<T*>(this);
+	}
+
 	static NetMessageIdType ourCounter;
 };
 
