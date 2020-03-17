@@ -29,6 +29,8 @@ private:
 	void Parse(char* aData, int aAmount);
 
 
+	bool myIsServer;
+
 	bool myIsValid;
 	char myConnectedUser[MAXUSERNAMELENGTH];
 	unsigned short myID;

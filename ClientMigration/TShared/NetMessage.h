@@ -13,7 +13,8 @@ public:
 		Setup,
 		Status,
 		PackageResponse,
-		BigFile
+		BigFile,
+		Identify
 	};
 	NetMessage();
 	Type  myType;

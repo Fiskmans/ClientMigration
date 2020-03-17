@@ -125,7 +125,7 @@ void NetworkClient::Connect()
 	std::string address;
 	std::cout << "Enter Adress: ";
 	//std::getline(std::cin, address);
-	address = "127.0.0.1"; // "server.mansandersen.com";
+	address = "server.mansandersen.com"; // "127.0.0.1"; // 
 	std::cout << "\n";
 	if (address.empty())
 	{
@@ -136,6 +136,16 @@ void NetworkClient::Connect()
 	using namespace std::string_literals;
 	TranslateAddress(address, (sockaddr*)&myTargetAddress, false, [](std::string message, bool isError) { std::cout << "["s + (isError ? "Error" : "Message") + "]: " + message + "\n"; });
 	myTargetAddress.sin_port = htons(SERVERPORT);
+
+	char addBuf[INET6_ADDRSTRLEN];
+	if (inet_ntop(myTargetAddress.sin_family, &myTargetAddress.sin_addr, addBuf, INET6_ADDRSTRLEN) != NULL)
+	{
+		std::cout << "Final address: "s + addBuf + std::string(16 - strlen(addBuf), ' ') + "\n";
+	}
+	else
+	{
+		std::cout << "Not a valid target address. \n";
+	}
 	HandShake();
 
 	return;

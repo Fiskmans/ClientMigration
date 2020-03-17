@@ -3,6 +3,7 @@
 #include <SetupMessage.h>
 #include <StatusMessage.h>
 #include <StatusMessage.h>
+#include <NetIdentify.h>
 
 
 Connection::Connection()
@@ -162,6 +163,24 @@ void Connection::Parse(char* aData, int aAmount)
 			myIsValid = false;
 		}
 		}
+		break;
+	case NetMessage::Type::Identify:	
+	{
+		NetIdentify* ident = reinterpret_cast<NetIdentify*>(aData);
+		switch (ident->myProcessType )
+		{
+		case NetIdentify::IdentificationType::IsServer:
+			myIsServer = true;
+			break;
+		case NetIdentify::IdentificationType::IsClient:
+			myIsServer = false;
+			NetIdentify response;
+			response.myProcessType = NetIdentify::IdentificationType::IsServer;
+			Send(response);
+			break;
+		}
+
+	}
 		break;
 	case NetMessage::Type::Invalid:
 	case NetMessage::Type::Setup:

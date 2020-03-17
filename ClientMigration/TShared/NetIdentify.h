@@ -25,6 +25,7 @@ namespace IdentificationTypes
 }
 class NetIdentify : public NetMessage
 {
+public:
 	enum class IdentificationType : char
 	{
 		Invalid,
@@ -32,9 +33,14 @@ class NetIdentify : public NetMessage
 		IsClient,
 		IsHost
 	};
+	NetIdentify();
+
+	IdentificationType myProcessType;
 	union
 	{
-		
+		IdentificationTypes::IsServer myIsServer;
+		IdentificationTypes::IsClient myIsClient;
+		IdentificationTypes::IsHost myIsHost;
 	};
 
 };
