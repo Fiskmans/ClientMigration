@@ -197,9 +197,9 @@ void NetworkClient::HandShake()
 			myIsHandshaking = false;
 		}
 	}
-	std::cout << "Identifying\n";
+	std::cout << "Identifying self\n";
 	NetIdentify identify;
-	identify.myProcessType = NetIdentify::IdentificationType::IsClient;
+	identify.myProcessType = NetIdentify::IdentificationType::IsServer;
 	identify.myIsClient.myUsername = myName;
 	Send(identify);
 }

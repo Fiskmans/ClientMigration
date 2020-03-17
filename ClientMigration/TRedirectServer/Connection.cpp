@@ -178,6 +178,7 @@ void Connection::Parse(char* aData, int aAmount)
 			myIsServer = false;
 			NetIdentify response;
 			response.myProcessType = NetIdentify::IdentificationType::IsServer;
+			NetworkInterface::HookCallBack(response.myID, std::bind(&Connection::SendServerStatus, this));
 			Send(response);
 			break;
 		}
@@ -191,6 +192,11 @@ void Connection::Parse(char* aData, int aAmount)
 		myIsValid = false;
 		return;
 	}
+}
+
+void Connection::SendServerStatus()
+{
+	std::cout << "Sending server list";
 }
 
 void Connection::TimedOut()

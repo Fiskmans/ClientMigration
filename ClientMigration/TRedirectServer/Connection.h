@@ -28,6 +28,7 @@ private:
 	bool HandShake(char* aData, int aAmount);
 	void Parse(char* aData, int aAmount);
 
+	void SendServerStatus();
 
 	bool myIsServer;
 
