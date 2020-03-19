@@ -11,11 +11,16 @@ public:
 		UserConnected,
 		UserOnline,
 		UserDisconnected,
+		PotentialServer
 	} myStatus;
 	union
 	{
 		char myUsername[128];
-
+		struct PotentialServer
+		{
+			sockaddr aAddress;
+			char aAddressSize;
+		} myServer;
 	};
 
 	void SetName(const std::string& aName);

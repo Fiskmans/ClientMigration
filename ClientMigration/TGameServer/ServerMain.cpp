@@ -6,6 +6,8 @@
 #include <thread>
 #include <TimeHelper.h>
 #include <Random.h>
+#include <NetworkHelpers.h>
+#include <NetIdentify.h>
 
 CServerMain::CServerMain()
 {
@@ -16,8 +18,9 @@ CServerMain::~CServerMain()
 {
 }
 
-#define PORT "5763"
 #define CLIENTPORT 5764
+#define GAMESERVERPORT 5765
+#define SOURCEPORT 5763
 
 
 
@@ -83,7 +86,7 @@ void CServerMain::StartServer()
 	hints.ai_flags = AI_PASSIVE;
 
 	// Resolve the local address and port to be used by the server
-	int iResult = getaddrinfo(NULL, PORT, &hints, &result);
+	int iResult = getaddrinfo(NULL, STRINGVALUE(GAMESERVERPORT), &hints, &result);
 	if (iResult != 0)
 	{
 		printf("getaddrinfo failed: %d\n", iResult);
@@ -107,6 +110,8 @@ void CServerMain::StartServer()
 	u_long mode = 1;  // 1 to enable non-blocking socket
 	ioctlsocket(mySocket, FIONBIO, &mode);
 
+	Connect();
+
 	Listen();
 
 	closesocket(mySocket);
@@ -115,6 +120,156 @@ void CServerMain::StartServer()
 	return;
 }
 
+void CServerMain::Receive(char* someData, const int aDataSize)
+{
+
+	if (myIsHandshaking && HandShakeAttempt(someData, aDataSize))
+	{
+	}
+	else
+	{
+		//Normal stuff
+	}
+}
+
+void CServerMain::Send(const char* someData, const int aDataSize)
+{
+	sendto(myUpstreamSocket, someData, aDataSize, 0, &myUpstreamAddress, sizeof(myUpstreamAddress));
+}
+
+void CServerMain::TimedOut()
+{
+	if (myIsConnected)
+	{
+		std::cout << "Upstream Timed out\n";
+		Connect();
+	}
+}
+
+
+void CServerMain::HandShake()
+{
+	char buf[BUFLEN];
+	int recv_len;
+	int slen;
+	slen = sizeof(myUpstreamAddress);
+	myIsConnected = false;
+
+	SetupMessage message;
+	DWORD length = MAXIDENTIFIERLENGTH;
+	GetUserNameA(message.myIdentifier, &length);
+	message.myStep = SetupMessage::SetupStep::Request;
+	std::string username = "GameServer " + std::to_string(GetCurrentProcessId());
+
+	strcpy_s<MAXIDENTIFIERLENGTH>(message.myIdentifier, username.c_str());
+
+	SetWindowTextA(GetConsoleWindow(), message.myIdentifier);
+
+	std::cout << "Starting Handshake\n";
+	while (!myIsConnected)
+	{
+		std::cout << "Sending Handshake package\n";
+		SendUpstream(message);
+		bool waitingForResponse = true;
+		while (waitingForResponse)
+		{
+			myIsHandshaking = true;
+			Flush();
+			if (!myIsHandshaking)
+			{
+				waitingForResponse = false;
+			}
+			myIsHandshaking = false;
+		}
+	}
+	std::cout << "Identifying self\n";
+	NetIdentify identify;
+	identify.myProcessType = NetIdentify::IdentificationType::IsServer;
+	identify.myIsServer.myName = "GameServer " + std::to_string(GetCurrentProcessId());
+	struct sockaddr_in sin;
+	socklen_t len = sizeof(sin);
+	if (getsockname(myUpstreamSocket, (struct sockaddr*) & sin, &len) != SOCKET_ERROR)
+	{
+		identify.myIsServer.myPort = sin.sin_port;
+	}
+	SendUpstream(identify);
+}
+
+bool CServerMain::HandShakeAttempt(char* aData, int aDataSize)
+{
+	if (aDataSize != sizeof(SetupMessage))
+	{
+		std::cout << "Package of wrong size, got [" + std::to_string(aDataSize) + "] expected [" + std::to_string(sizeof(SetupMessage)) + "]\n";
+		return false;
+	}
+
+	NetMessage* netMess = reinterpret_cast<NetMessage*>(aData);
+	if (netMess->myType == NetMessage::Type::Setup)
+	{
+		SetupMessage* setupMess = reinterpret_cast<SetupMessage*>(aData);
+		if (setupMess->myResponse.myResult)
+		{
+			std::cout << "Connection to server established with id: " + std::to_string(setupMess->myResponse.myID) + "\n";
+			myUpstreamID = setupMess->myResponse.myID;
+
+
+			myIsConnected = true;
+		}
+		else
+		{
+			std::cout << "Server Rejected Handshake\n";
+		}
+	}
+	else
+	{
+		std::cout << "Got invalid netmessageType: " + std::to_string(static_cast<int>(netMess->myType)) + "\n";
+		return false;
+	}
+	myIsHandshaking = false;
+	return true;
+}
+void CServerMain::Connect()
+{
+
+	//Create a socket
+	myUpstreamSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (myUpstreamSocket == INVALID_SOCKET)
+	{
+		std::cout << "Could not create socket: " + std::to_string(WSAGetLastError()) + "\n";
+		return;
+	}
+	std::cout << "Socket created.\n";
+
+
+	memset(&myUpstreamAddress, 0, sizeof(myUpstreamAddress));
+
+	u_long mode = 1;  // 1 to enable non-blocking socket
+	ioctlsocket(myUpstreamSocket, FIONBIO, &mode);
+
+	sockaddr_in sockAddr;
+
+	sockAddr.sin_family = AF_INET;
+	sockAddr.sin_port = htons(5763);
+	sockAddr.sin_addr.S_un.S_addr = INADDR_ANY; // use default
+
+	using namespace std::string_literals;
+	TranslateAddress("server.mansandersen.com", (sockaddr*)&myUpstreamAddress, false, [](std::string message, bool isError) { std::cout << "["s + (isError ? "Error" : "Message") + "]: " + message + "\n"; });
+	((sockaddr_in*)&myUpstreamAddress)->sin_port = htons(SOURCEPORT);
+
+
+	char addBuf[INET6_ADDRSTRLEN];
+	if (inet_ntop(((sockaddr_in*)&myUpstreamAddress)->sin_family, &((sockaddr_in*)&myUpstreamAddress)->sin_addr, addBuf, INET6_ADDRSTRLEN) != NULL)
+	{
+		std::cout << "Final address: "s + addBuf + std::string(16 - strlen(addBuf), ' ') + "\n";
+	}
+	else
+	{
+		std::cout << "Not a valid target address. \n";
+	}
+	HandShake();
+
+	return;
+}
 
 void CServerMain::Listen()
 {
@@ -240,4 +395,35 @@ void CServerMain::TransmitMessage(const NetMessage& aMessage)
 		break;
 	}
 
+}
+
+void CServerMain::Flush()
+{
+	NetworkInterface::Flush();
+
+	char buf[BUFLEN];
+	int recv_len;
+	int slen;
+	slen = sizeof(myUpstreamAddress);
+	sockaddr addr;
+
+	while (true)
+	{
+		recv_len = recvfrom(myUpstreamSocket, buf, BUFLEN, 0, &addr, &slen);
+		if (recv_len == SOCKET_ERROR)
+		{
+			int error = WSAGetLastError();
+			if (error == WSAEWOULDBLOCK)
+			{
+				break;
+			}
+			std::cout << "Could not recvieve data from server: " + std::to_string(error) + "\n";
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+		if (NetworkInterface::PreProcessReceive(buf, recv_len))
+		{
+			Receive(buf, recv_len);
+		}
+	}
 }

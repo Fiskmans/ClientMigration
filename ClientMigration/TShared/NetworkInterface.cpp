@@ -16,7 +16,7 @@ void NetworkInterface::PreProcessAndSend(const NetMessage* aMessage, const int a
 	{
 		SentMessageTracker tracker;
 #if LOGTRAFFIC
-		std::cout << "Sent trackable package ID [" +  std::to_string(aMessage->myID) + "]\n";
+		std::cout << "Sent trackable package of type [" + std::to_string(static_cast<short>(aMessage->myType)) + "] ID [" +  std::to_string(aMessage->myID) + "]\n";
 #endif
 		memcpy(tracker.package, aMessage, aDataSize);
 		tracker.packageSize = aDataSize;

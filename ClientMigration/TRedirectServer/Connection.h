@@ -6,11 +6,14 @@
 class MoveMessage;
 class StatusMessage;
 
+typedef std::function<void(const NetMessage&)> SendCallback;
+
 class Connection : public NetworkInterface
 {
+	typedef std::function<std::vector<Connection*> (const Connection&)> ConnectionRequestFunction;
 public:
 	Connection();
-	Connection(sockaddr_in aAddress, int aAddressSize, SOCKET aSocket, unsigned short aID, std::function<void(const NetMessage&)> aCallbackFunction);
+	Connection(sockaddr_in aAddress, int aAddressSize, SOCKET aSocket, unsigned short aID, SendCallback aCallbackFunction, ConnectionRequestFunction aRequestFunction);
 
 	bool IsAlive();
 
@@ -22,6 +25,8 @@ public:
 
 	unsigned short GetID();
 	std::string GetName();
+
+
 private:
 	bool Evaluate(MoveMessage* aMessage);
 
@@ -42,7 +47,8 @@ private:
 
 	sockaddr_in myAddress;
 	int myAddressSize;
-	std::function<void(const NetMessage&)> myCallbackFunction;
+	SendCallback myCallbackFunction;
+	ConnectionRequestFunction myConnectionListRequestFunction;
 
 	// Inherited via NetworkInterface
 	virtual void TimedOut() override;

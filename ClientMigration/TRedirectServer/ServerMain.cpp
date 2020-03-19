@@ -118,6 +118,10 @@ void RedirectServer::StartServer()
 }
 
 
+void RedirectServer::HandShake()
+{
+}
+
 void RedirectServer::Connect()
 {
 }
@@ -168,7 +172,7 @@ void RedirectServer::Listen()
 		if (it == myClients.end())
 		{
 			static unsigned short IDCOUNTER = 3;
-			myClients[key] = Connection(si_other, slen, mySocket, ++IDCOUNTER, std::bind(&RedirectServer::TransmitMessage, this, std::placeholders::_1));
+			myClients[key] = Connection(si_other, slen, mySocket, ++IDCOUNTER, std::bind(&RedirectServer::TransmitMessage, this, std::placeholders::_1),std::bind(&RedirectServer::RequestList,this,std::placeholders::_1));
 			it = myClients.find(key);
 		}
 
@@ -246,4 +250,15 @@ void RedirectServer::TransmitMessage(const NetMessage& aMessage)
 		break;
 	}
 
+}
+
+std::vector<Connection*> RedirectServer::RequestList(const Connection& aRequester)
+{
+	std::vector<Connection*> out;
+	for (auto& i : myClients)
+	{
+		out.push_back(&i.second);
+	}
+
+	return out;
 }

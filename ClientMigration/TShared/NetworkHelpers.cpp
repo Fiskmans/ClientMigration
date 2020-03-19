@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "NetworkHelpers.h"
 
+struct sockaddr;
+
 bool TranslateAddress(const std::string& aAddress, sockaddr* aAddressTarget, bool aAllowFailure, std::function<void(std::string,bool)> aPrinter)
 {
 

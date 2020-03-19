@@ -10,15 +10,17 @@ Connection::Connection()
 {
 }
 
-Connection::Connection(sockaddr_in aAddress, int aAddressSize, SOCKET aSocket, unsigned short aID, std::function<void(const NetMessage&)> aCallbackFunction)
+Connection::Connection(sockaddr_in aAddress, int aAddressSize, SOCKET aSocket, unsigned short aID, SendCallback aCallbackFunction, ConnectionRequestFunction aRequestFunction)
 {
 	myCallbackFunction = aCallbackFunction;
+	myConnectionListRequestFunction = aRequestFunction;
 	myID = aID;
 	mySocket = aSocket;
 	myAddress = aAddress;
 	myAddressSize = aAddressSize;
 	myIsValid = false;
 }
+
 
 bool Connection::IsAlive()
 {
@@ -27,7 +29,7 @@ bool Connection::IsAlive()
 
 void Connection::Send(const char* aData, int aDataSize)
 {
-	sendto(mySocket, aData,aDataSize, 0, (struct sockaddr*) & myAddress, myAddressSize);
+	sendto(mySocket, aData, aDataSize, 0, (struct sockaddr*) & myAddress, myAddressSize);
 }
 
 void Connection::Receive(char* someData, const int aDataSize)
@@ -120,9 +122,9 @@ bool Connection::HandShake(char* aData, int aAmount)
 
 	SetupMessage response;
 	response.myResponse.myResult = true;
-	response.myResponse.myID = myID; 
+	response.myResponse.myID = myID;
 	response.myStep = SetupMessage::SetupStep::Response;
-	NetworkInterface::PreProcessAndSend(&response,sizeof(response));
+	NetworkInterface::PreProcessAndSend(&response, sizeof(response));
 
 	StatusMessage logonResponse;
 	logonResponse.myID = myID;
@@ -151,7 +153,7 @@ void Connection::Parse(char* aData, int aAmount)
 	switch (netMess->myType)
 	{
 	case NetMessage::Type::Status:
-		{
+	{
 		StatusMessage* status = reinterpret_cast<StatusMessage*>(aData);
 		if (status->myStatus == StatusMessage::Status::UserDisconnected)
 		{
@@ -162,15 +164,16 @@ void Connection::Parse(char* aData, int aAmount)
 			std::cout << myConnectedUser << " behaved badly and was kicked. sent status that was not disconnect\n";
 			myIsValid = false;
 		}
-		}
-		break;
-	case NetMessage::Type::Identify:	
+	}
+	break;
+	case NetMessage::Type::Identify:
 	{
 		NetIdentify* ident = reinterpret_cast<NetIdentify*>(aData);
-		switch (ident->myProcessType )
+		switch (ident->myProcessType)
 		{
 		case NetIdentify::IdentificationType::IsServer:
 			std::cout << "Server Connected\n";
+			//myAddress.sin_port = htons(ident->myIsServer.myPort);
 			myIsServer = true;
 			break;
 		case NetIdentify::IdentificationType::IsClient:
@@ -184,9 +187,10 @@ void Connection::Parse(char* aData, int aAmount)
 		}
 
 	}
+	break;
+	case NetMessage::Type::Setup:
 		break;
 	case NetMessage::Type::Invalid:
-	case NetMessage::Type::Setup:
 	default:
 		std::cout << myConnectedUser << " behaved badly and was kicked. sent unkown message type\n";
 		myIsValid = false;
@@ -196,7 +200,21 @@ void Connection::Parse(char* aData, int aAmount)
 
 void Connection::SendServerStatus()
 {
-	std::cout << "Sending server list";
+	std::cout << "Sending server list\n";
+	std::vector<Connection*> connections = myConnectionListRequestFunction(*this);
+	for (auto& conn : connections)
+	{
+		if (conn->myIsValid && conn->myIsServer)
+		{
+			std::cout << "\t" + conn->GetName() + "\n";
+			StatusMessage message;
+			message.myStatus = StatusMessage::Status::PotentialServer;
+			memcpy(&message.myServer.aAddress, &conn->myAddress, conn->myAddressSize);
+			message.myServer.aAddressSize = conn->myAddressSize;
+			Send(message);
+		}
+	}
+
 }
 
 void Connection::TimedOut()

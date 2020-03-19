@@ -109,13 +109,9 @@ void NetworkClient::Connect()
 
 
 	memset(&myTargetAddress, 0, sizeof(myTargetAddress));
-	myTargetAddress.sin_family = AF_INET;
-	myTargetAddress.sin_port = htons(SERVERPORT);
-
 
 	u_long mode = 1;  // 1 to enable non-blocking socket
 	ioctlsocket(mySocket, FIONBIO, &mode);
-
 
 	sockaddr_in sockAddr;
 
@@ -347,46 +343,6 @@ void NetworkClient::Send(const char* someData, const int aDataSize)
 	++myPackageStart;
 }
 
-std::variant<int, std::string> NetworkClient::SelectServer()
-{
-	std::string selection;
-	std::variant<int, std::string> outp;
-	do
-	{
-		std::cout << "Enter address or index: ";
-		std::cin >> selection;
-		size_t invpos = selection.find_first_of("0123456789.");
-		if (invpos != std::string::npos)
-		{
-			std::cout << "address contains invalid character: [" + std::string(1, selection[invpos]) + "]\n";
-			continue;
-		}
-		size_t dotPos = selection.find('.');
-		if (dotPos == std::string::npos)
-		{
-			int selected = std::stoi(selection);
-			std::lock_guard lock(myServerMutex);
-
-			if (selected > 0 && selected < myServers.size())
-			{
-				outp = selected;
-				break;
-			}
-			else
-			{
-				std::cout << "[" + std::to_string(selected) + "] is not a valid server index\n";
-			}
-		}
-		else
-		{
-			outp = selection;
-			break;
-		}
-
-	} while (true);
-	return outp;
-}
-
 void NetworkClient::Receive(char* someData, const int aDataSize)
 {
 	if (myIsHandshaking && HandShakeAttempt(someData, aDataSize))
@@ -395,6 +351,17 @@ void NetworkClient::Receive(char* someData, const int aDataSize)
 	else
 	{
 		NetMessage* netMess = reinterpret_cast<NetMessage*>(someData);
+
+		if (netMess->myType == NetMessage::Type::Status)
+		{
+			StatusMessage* status = reinterpret_cast<StatusMessage*>(netMess);
+			if (status->myStatus == StatusMessage::Status::PotentialServer)
+			{
+				memset(&myTargetAddress, 0, sizeof(myTargetAddress));
+				memcpy(&myTargetAddress, &status->myServer.aAddress, status->myServer.aAddressSize);
+				HandShake();
+			}
+		}
 		if (netMess->myType == NetMessage::Type::Setup)
 		{
 			SetupMessage* setupMessage = reinterpret_cast<SetupMessage*>(someData);
@@ -404,7 +371,7 @@ void NetworkClient::Receive(char* someData, const int aDataSize)
 		}
 		else if (netMess->myType == NetMessage::Type::Identify)
 		{
-			NetIdentify* ident = *netMess;
+			NetIdentify* ident = reinterpret_cast<NetIdentify*>(netMess);
 			switch (ident->myProcessType)
 			{
 			case NetIdentify::IdentificationType::IsServer:

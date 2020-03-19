@@ -14,10 +14,14 @@ public:
 
 private:
 
+	void HandShake();
+
 	void Connect();
 	void Listen();
 	void TransmitMessage(const NetMessage& aMessage);
+	std::vector<Connection*> RequestList(const Connection& aRequester);
 
+	bool myIsConnected = false;
 	char myUpdateDistance = 0;
 
 	sockaddr myUpstreamAddress;
