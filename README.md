@@ -26,9 +26,9 @@ Om även mer tid finns Vill jag koppla servrarnas uppmätta ’hälsa’ och bel
 
 __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress annars hitta ett webhotell el.dyl för att hosta en simpel redirectsida och med en kombination av LibCurl och string parsing göra det som jag tror dns gör automagiskt dvs redirecta till min hemadress~
 
-__17/03 tisdag:__	~Få klienten att koppla upp sig till ett domännamn och få en koppling till en server som kör på min hemdator~
+~__17/03 tisdag:__	Få klienten att koppla upp sig till ett domännamn och få en koppling till en server som kör på min hemdator~
 
-__18/03 onsdag:__	 Sätta upp en simpel redirekt server och koppla upp klienten via den istället
+~__18/03 onsdag:__	 Sätta upp en simpel redirekt server och koppla upp klienten via den istället~
 
 __19/03 torsdag:__	Buggfixing/bufferdag ’Vad är det här!?’, ’Vad gjorde jag här!?’, ’Varför gjorde jag så!?’ eller liknande kommentarer kan förekomma
 
