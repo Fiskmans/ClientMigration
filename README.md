@@ -47,16 +47,3 @@ __27/03 fredag:__ Oplanerad
 __30/04 måndag:__ Oplanerad
 
 __31/04 tisdag:__	Oplanerad
-
-__01/04 onsdag:__
-
-__02/04 torsdag:__	
-
-__06/04 måndag:__
-
-__07/04 tisdag:__	
-
-__08/04 onsdag:__	
-
-__09/04 torsdag:__	
-
