@@ -16,7 +16,7 @@ public:
 
 	template<class T>
 	void Send(const T& aData);
-	void Send(const char* aData,int aDataSize) override;
+	void Send(const char* aData,int aDataSize, sockaddr* aCustomAddress = nullptr) override;
 	void Receive(char* someData, const int aDataSize) override;
 	void Invalidate();
 

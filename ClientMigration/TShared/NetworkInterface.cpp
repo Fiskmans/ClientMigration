@@ -4,31 +4,41 @@
 #include "TimeHelper.h"
 #include "NetPackResponse.h"
 #include <iostream>
+#include "NetworkHelpers.h"
 
 #define RESENDTIMER 0.2f
 #define MESSAGEDUPLICATIONTIMEOUT 2.f
 #define LOGTRAFFIC false
 #define RESENDCAP 40
 
-void NetworkInterface::PreProcessAndSend(const NetMessage* aMessage, const int aDataSize)
+void NetworkInterface::PreProcessAndSend(const NetMessage* aMessage, const int aDataSize, sockaddr* aCustomAddress)
 {
 	if (aMessage->IsImportant())
 	{
 		SentMessageTracker tracker;
 #if LOGTRAFFIC
-		std::cout << "Sent trackable package of type [" + std::to_string(static_cast<short>(aMessage->myType)) + "] ID [" +  std::to_string(aMessage->myID) + "]\n";
+		std::cout << "Sent trackable package of type [" + std::to_string(static_cast<short>(aMessage->myType)) + "] ID [" +  std::to_string(aMessage->myNetMessageID) + "]\n";
 #endif
 		memcpy(tracker.package, aMessage, aDataSize);
 		tracker.packageSize = aDataSize;
 
-		tracker.ID = aMessage->myID;
+		tracker.ID = aMessage->myNetMessageID;
 		tracker.expectedHash = std::hash<std::string>()(std::string(reinterpret_cast<const char*>(aMessage), aDataSize));
 		tracker.lastSent = Tools::GetTotalTime();
 		tracker.sentCount = 0;
-		
+		tracker.myHasCustomAddress = !!aCustomAddress;
+		if (aCustomAddress)
+		{
+			tracker.myCustomAddress = *aCustomAddress;
+
+#if LOGTRAFFIC
+			std::cout << "Sending package to custom ip: " + ReadableAddress(aCustomAddress) + "\n";
+#endif
+		}
+
 		myPendingAccepts.push_back(tracker);
 	}
-	Send(reinterpret_cast<const char*>(aMessage), aDataSize);
+	Send(reinterpret_cast<const char*>(aMessage), aDataSize, aCustomAddress);
 }
 
 bool NetworkInterface::PreProcessReceive(char* someData, const int aDataSize)
@@ -40,7 +50,7 @@ bool NetworkInterface::PreProcessReceive(char* someData, const int aDataSize)
 	{
 		for (size_t i = 0; i < myRecentMesseges.size(); i++)
 		{
-			if (myRecentMesseges[i].first == mess->myID)
+			if (myRecentMesseges[i].first == mess->myNetMessageID)
 			{
 				consumed = true;
 				myRecentMesseges[i].second = Tools::GetTotalTime();
@@ -54,13 +64,13 @@ bool NetworkInterface::PreProcessReceive(char* someData, const int aDataSize)
 		}
 		if (!consumed)
 		{
-			myRecentMesseges.emplace_back(mess->myID, Tools::GetTotalTime());
+			myRecentMesseges.emplace_back(mess->myNetMessageID, Tools::GetTotalTime());
 		}
 #if LOGTRAFFIC
-		std::cout << "Sent message acc for packageid: [" + std::to_string(mess->myID) + "]\n";
+		std::cout << "Sent message acc for packageid: [" + std::to_string(mess->myNetMessageID) + "]\n";
 #endif
 		NetPackResponse response;
-		response.myPackageID = mess->myID;
+		response.myPackageID = mess->myNetMessageID;
 		response.myHash = std::hash<std::string>()(std::string(someData, aDataSize));
 
 		Send(reinterpret_cast<char*>(&response), sizeof(response));
@@ -109,10 +119,10 @@ void NetworkInterface::Flush()
 				TimedOut();
 			}
 			acc.lastSent = now;
-			Send(acc.package,acc.packageSize);
+			Send(acc.package,acc.packageSize, acc.myHasCustomAddress ? &acc.myCustomAddress : nullptr);
 			acc.sentCount++;
 #if LOGTRAFFIC
-			std::cout << "Re-Sent package with id [" + std::to_string(reinterpret_cast<NetMessage*>(acc.package)->myID) + "]\n";
+			std::cout << "Re-Sent package with id [" + std::to_string(reinterpret_cast<NetMessage*>(acc.package)->myNetMessageID) + "]\n";
 #endif
 		}
 	}

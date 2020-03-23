@@ -11,18 +11,25 @@ public:
 		UserConnected,
 		UserOnline,
 		UserDisconnected,
-		PotentialServer
+		PotentialServer,
+		EvaluatedServer,
+		ConnectToServer
 	} myStatus;
+
+	sockaddr myAddress;
 	union
 	{
 		char myUsername[128];
 		struct PotentialServer
 		{
-			sockaddr aAddress;
 			char aAddressSize;
 		} myServer;
+		struct EvaluatedServer
+		{
+			float aPing;
+		} myEvalServer;
 	};
-
+	unsigned short myAssignedID;
 	void SetName(const std::string& aName);
 
 };

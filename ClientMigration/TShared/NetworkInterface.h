@@ -12,6 +12,8 @@ struct SentMessageTracker
 	NetMessageIdType ID;
 	short packageSize;
 	char sentCount;
+	bool myHasCustomAddress;
+	sockaddr myCustomAddress;
 };
 
 
@@ -22,10 +24,10 @@ public:
 	~NetworkInterface() = default;
 
 	virtual void Receive(char* someData, const int aDataSize) = 0;
-	virtual void Send(const char* someData, const int aDataSize) = 0;
+	virtual void Send(const char* someData, const int aDataSize, sockaddr* aCustomAddress = nullptr) = 0;
 	virtual void TimedOut() = 0;
 
-	void PreProcessAndSend(const NetMessage* aMessage, const int aDataSize);
+	void PreProcessAndSend(const NetMessage* aMessage, const int aDataSize, sockaddr* aCustomAddress = nullptr);
 	bool PreProcessReceive(char* someData, const int aDataSize);
 	
 	void Flush();

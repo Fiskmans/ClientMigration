@@ -2,8 +2,7 @@
 #include "Connection.h"
 #include <SetupMessage.h>
 #include <StatusMessage.h>
-#include <StatusMessage.h>
-
+#include <NetworkHelpers.h>
 
 Connection::Connection()
 {
@@ -24,13 +23,14 @@ bool Connection::IsAlive()
 	return true; // TODO
 }
 
-void Connection::Send(const char* aData, int aDataSize)
+void Connection::Send(const char* aData, int aDataSize, sockaddr* aCustomAddress)
 {
 	sendto(mySocket, aData,aDataSize, 0, (struct sockaddr*) & myAddress, myAddressSize);
 }
 
 void Connection::Receive(char* someData, const int aDataSize)
 {
+	std::cout << "[" + std::to_string(aDataSize) + "]\n";
 	if (aDataSize == 0)
 	{
 		std::cout << myConnectedUser << " Has exited gracefully.\n";
@@ -124,16 +124,13 @@ bool Connection::HandShake(char* aData, int aAmount)
 	NetworkInterface::PreProcessAndSend(&response,sizeof(response));
 
 	StatusMessage logonResponse;
-	logonResponse.myID = myID;
+	logonResponse.myAssignedID = myID;
 	logonResponse.SetName(myConnectedUser);
 	logonResponse.myStatus = StatusMessage::Status::UserConnected;
 	myCallbackFunction(logonResponse);
 
-	char addressBuffer[512];
-	InetNtopA(AF_INET, &myAddress, addressBuffer, 512);
-	std::string addrstring = addressBuffer;
 
-	std::cout << "Connection Established with user: " << myConnectedUser << " on " << addrstring << "\n";
+	std::cout << "Connection Established with user: " << myConnectedUser << " on " << ReadableAddress((sockaddr*)&myAddress) << "\n";
 
 	return true;
 }

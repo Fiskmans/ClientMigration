@@ -12,7 +12,7 @@ public:
 	void StartServer();
 
 	virtual void Receive(char* someData, const int aDataSize) override final;
-	virtual void Send(const char* someData, const int aDataSize) override final;
+	virtual void Send(const char* someData, const int aDataSize, sockaddr* aCustomAddress = nullptr) override final;
 	virtual void TimedOut() override final;
 
 private:

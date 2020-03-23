@@ -142,7 +142,7 @@ void BigFile::Start()
 	mess.myHead.myDataSize = myDataSize;
 	strcpy_s<NAMELENGTH>(mess.myHead.myName, myName.c_str());
 	myHasSentHead = true;
-	myInterFaceToWorkAgainst->HookCallBack(mess.myID, std::bind(&BigFile::PeerAcceptedHead, this, std::placeholders::_1));
+	myInterFaceToWorkAgainst->HookCallBack(mess.myNetMessageID, std::bind(&BigFile::PeerAcceptedHead, this, std::placeholders::_1));
 	myInterFaceToWorkAgainst->PreProcessAndSend(&mess, sizeof(mess));
 }
 
@@ -247,7 +247,7 @@ void BigFile::SendNextSegmentHeader()
 	BigFileMessage mess;
 	mess.myStage = BigFileMessage::BigFileStage::SegmentDeclaration;
 	mess.myDeclaration.myChecksum = myCurrentSegment.myChecksum;
-	myInterFaceToWorkAgainst->HookCallBack(mess.myID, std::bind(&BigFile::PeerAcceptedSegmentHeader, this, std::placeholders::_1));
+	myInterFaceToWorkAgainst->HookCallBack(mess.myNetMessageID, std::bind(&BigFile::PeerAcceptedSegmentHeader, this, std::placeholders::_1));
 	myInterFaceToWorkAgainst->PreProcessAndSend(&mess, sizeof(mess));
 }
 

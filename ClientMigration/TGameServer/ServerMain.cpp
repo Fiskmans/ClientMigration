@@ -22,6 +22,9 @@ CServerMain::~CServerMain()
 #define GAMESERVERPORT 5765
 #define SOURCEPORT 5763
 
+#define PORTRANGEBEGIN 5766
+#define PORTRANGEEND 5801
+
 
 
 int CalculateBroadcastIP(std::string aIP, std::string aSubNet, std::string& aBroadcast)
@@ -96,16 +99,38 @@ void CServerMain::StartServer()
 
 	std::cout << "Got address info!\n";
 
-	int broadcast = 1;
-	setsockopt(mySocket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof broadcast);
 	//Bind
-	if (bind(mySocket, result->ai_addr, (int)result->ai_addrlen))
+	sockaddr bindAddress = *result->ai_addr;
+	bool bound = false;
+	for (size_t i = PORTRANGEBEGIN; i < PORTRANGEEND; i++)
 	{
-		std::cout << "Bind failed with error code : " + std::to_string(WSAGetLastError()) + "\n";
+		((sockaddr_in*)&bindAddress)->sin_port = i;
+		if (bind(mySocket, &bindAddress, sizeof(bindAddress)))
+		{
+			std::cout << "Failed to bind to: " + std::to_string(i) + " trying next in range\n";
+		}
+		else
+		{
+			bound = true;
+			break;
+		}
+	}
+	if (!bound)
+	{
+		std::cout << "Failed to bind on all ports:\n";
 		return;
 	}
-		
-	std::cout << "Bind Successfull\n";
+
+	struct sockaddr_in sin;
+	socklen_t len = sizeof(sin);
+	if (getsockname(mySocket, (struct sockaddr*) & sin, &len) != SOCKET_ERROR)
+	{
+		std::cout << "Bind Successfull on ip: " + ReadableAddress((sockaddr*)&sin) + "\n";
+	}
+	else
+	{
+		std::cout << "could not retrieve address from bound socket but got no error on bind.\n";
+	}
 
 	u_long mode = 1;  // 1 to enable non-blocking socket
 	ioctlsocket(mySocket, FIONBIO, &mode);
@@ -128,13 +153,25 @@ void CServerMain::Receive(char* someData, const int aDataSize)
 	}
 	else
 	{
+		NetMessage* message = reinterpret_cast<NetMessage*>(someData);
+		if (message->myType == NetMessage::Type::Ping)
+		{
+			std::cout << "I was pinged\n";
+		}
 		//Normal stuff
 	}
 }
 
-void CServerMain::Send(const char* someData, const int aDataSize)
+void CServerMain::Send(const char* someData, const int aDataSize,sockaddr* aCustomAddress)
 {
-	sendto(myUpstreamSocket, someData, aDataSize, 0, &myUpstreamAddress, sizeof(myUpstreamAddress));
+	if (aCustomAddress)
+	{
+		sendto(myUpstreamSocket, someData, aDataSize, 0, aCustomAddress, sizeof(*aCustomAddress));
+	}
+	else
+	{
+		sendto(myUpstreamSocket, someData, aDataSize, 0, &myUpstreamAddress, sizeof(myUpstreamAddress));
+	}
 }
 
 void CServerMain::TimedOut()
@@ -188,9 +225,10 @@ void CServerMain::HandShake()
 	identify.myIsServer.myName = "GameServer " + std::to_string(GetCurrentProcessId());
 	struct sockaddr_in sin;
 	socklen_t len = sizeof(sin);
-	if (getsockname(myUpstreamSocket, (struct sockaddr*) & sin, &len) != SOCKET_ERROR)
+	if (getsockname(mySocket, (struct sockaddr*) & sin, &len) != SOCKET_ERROR)
 	{
 		identify.myIsServer.myPort = sin.sin_port;
+		std::cout << "Identifying on port: " + std::to_string(sin.sin_port) + "\n";
 	}
 	SendUpstream(identify);
 }
@@ -277,15 +315,29 @@ void CServerMain::Listen()
 	int slen, recv_len;
 	char buf[BUFLEN];
 	slen = sizeof(si_other);
+
+	sockaddr sin;
+	int len = sizeof(sin);
+	if (getsockname(mySocket,& sin, &len) != SOCKET_ERROR)
+	{
+		std::cout << "Listening on: " + ReadableAddress(&sin) + "\n";
+	}
+	else
+	{
+		std::cout << "Could not get address info on listener\n";
+	}
+
 	while (true)
 	{
+		Flush();
+
 		for (auto& cli : myClients)
 		{
 			if (!cli.second.IsAlive())
 			{
 				StatusMessage message;
 				message.myStatus = StatusMessage::Status::UserDisconnected;
-				message.myID = cli.second.GetID();
+				message.myAssignedID = cli.second.GetID();
 				TransmitMessage(message);
 				myClients.erase(cli.first);
 				break;
@@ -297,7 +349,7 @@ void CServerMain::Listen()
 		}
 
 		recv_len = recvfrom(mySocket, buf, BUFLEN, 0, reinterpret_cast<sockaddr*>(&si_other), &slen);
-
+		
 		char addressBuffer[512];
 		InetNtopA(AF_INET, &si_other, addressBuffer, 512);
 		std::string key = addressBuffer;
@@ -313,6 +365,15 @@ void CServerMain::Listen()
 			myClients[key].Invalidate();
 			continue;
 		}
+
+		NetMessage* message = reinterpret_cast<NetMessage*>(buf);
+		if (message->myType == NetMessage::Type::Ping)
+		{
+			std::cout << "I Was pinged\n";
+		}
+
+		std::cout << "here?\n";
+
 		auto it = myClients.find(key);
 		if (it == myClients.end())
 		{
@@ -339,10 +400,10 @@ void CServerMain::TransmitMessage(const NetMessage& aMessage)
 		{
 		case StatusMessage::Status::UserConnected:
 		{
-			std::cout << "Telling all clients that [" << status.myUsername << "] has connected on id [" + std::to_string(status.myID) + "]\n";
+			std::cout << "Telling all clients that [" << status.myUsername << "] has connected on id [" + std::to_string(status.myAssignedID) + "]\n";
 			for (auto& it : myClients)
 			{
-				if (it.second.GetID() == status.myID)
+				if (it.second.GetID() == status.myAssignedID)
 				{
 					for (auto& cli : myClients)
 					{
@@ -351,7 +412,7 @@ void CServerMain::TransmitMessage(const NetMessage& aMessage)
 							StatusMessage userStatus;
 							userStatus.SetName(cli.second.GetName());
 							userStatus.myStatus = StatusMessage::Status::UserOnline;
-							userStatus.myID = cli.second.GetID();
+							userStatus.myAssignedID = cli.second.GetID();
 							it.second.Send(userStatus);
 						}
 					}
@@ -369,7 +430,7 @@ void CServerMain::TransmitMessage(const NetMessage& aMessage)
 			std::cout << "Telling all clients that [";
 			for (auto& i : myClients)
 			{
-				if (i.second.GetID() == status.myID)
+				if (i.second.GetID() == status.myAssignedID)
 				{
 					std::cout << i.second.GetName();
 				}
@@ -377,7 +438,7 @@ void CServerMain::TransmitMessage(const NetMessage& aMessage)
 			std::cout << "] has disconnected.\n";
 			for (auto& it : myClients)
 			{
-				if (it.second.GetID() != status.myID)
+				if (it.second.GetID() != status.myAssignedID)
 				{
 					it.second.Send(status);
 				}

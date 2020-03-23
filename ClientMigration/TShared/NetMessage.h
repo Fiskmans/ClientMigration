@@ -14,11 +14,12 @@ public:
 		Status,
 		PackageResponse,
 		BigFile,
-		Identify
+		Identify,
+		Ping
 	};
 	NetMessage();
 	Type  myType;
-	NetMessageIdType myID;
+	NetMessageIdType myNetMessageID;
 	bool IsImportant() const;
 	char* begin();
 
@@ -39,7 +40,7 @@ public:
 
 inline NetMessage::NetMessage()
 {
-	myID = ourCounter++;
+	myNetMessageID = ourCounter++;
 	myType = Type::Invalid;
 }
 

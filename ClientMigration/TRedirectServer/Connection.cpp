@@ -2,9 +2,12 @@
 #include "Connection.h"
 #include <SetupMessage.h>
 #include <StatusMessage.h>
-#include <StatusMessage.h>
 #include <NetIdentify.h>
+#include <TimeHelper.h>
+#include <NetworkHelpers.h>
 
+#define TTL 1.5f
+#define REDIRECTTIMEOUT 5.f
 
 Connection::Connection()
 {
@@ -19,21 +22,24 @@ Connection::Connection(sockaddr_in aAddress, int aAddressSize, SOCKET aSocket, u
 	myAddress = aAddress;
 	myAddressSize = aAddressSize;
 	myIsValid = false;
+	myIsRedirecting = false;
 }
 
 
 bool Connection::IsAlive()
 {
-	return true; // TODO
+	float now = Tools::GetTotalTime();
+	return myIsValid; // && (now - myLastUpdate < TTL); // TODO
 }
 
-void Connection::Send(const char* aData, int aDataSize)
+void Connection::Send(const char* aData, int aDataSize, sockaddr* aCustomAddress)
 {
 	sendto(mySocket, aData, aDataSize, 0, (struct sockaddr*) & myAddress, myAddressSize);
 }
 
 void Connection::Receive(char* someData, const int aDataSize)
 {
+	myLastUpdate = Tools::GetTotalTime();
 	if (aDataSize == 0)
 	{
 		std::cout << myConnectedUser << " Has exited gracefully.\n";
@@ -62,6 +68,19 @@ void Connection::Invalidate()
 {
 	myIsValid = false;
 	NetworkInterface::Clear();
+}
+
+void Connection::Flush()
+{
+	NetworkInterface::Flush();
+	if (myIsRedirecting)
+	{
+		float now = Tools::GetTotalTime();
+		if (now - myRedirectStart > REDIRECTTIMEOUT)
+		{
+			EvaluateRedirectResult(true);
+		}
+	}
 }
 
 
@@ -127,18 +146,20 @@ bool Connection::HandShake(char* aData, int aAmount)
 	NetworkInterface::PreProcessAndSend(&response, sizeof(response));
 
 	StatusMessage logonResponse;
-	logonResponse.myID = myID;
+	logonResponse.myAssignedID = myID;
 	logonResponse.SetName(myConnectedUser);
 	logonResponse.myStatus = StatusMessage::Status::UserConnected;
 	myCallbackFunction(logonResponse);
 
-	char addressBuffer[512];
-	InetNtopA(AF_INET, &myAddress, addressBuffer, 512);
-	std::string addrstring = addressBuffer;
 
-	std::cout << "Connection Established with user: " << myConnectedUser << " on " << addrstring << "\n";
+	std::cout << "Connection Established with user: " << myConnectedUser << " on " << ReadableAddress((sockaddr*)&myAddress) << "\n";
 
 	return true;
+}
+
+std::array<char, sizeof(sockaddr)> AddrToArray(sockaddr aAddress)
+{
+	return *reinterpret_cast<std::array<char, sizeof(sockaddr)>*>(&aAddress);
 }
 
 void Connection::Parse(char* aData, int aAmount)
@@ -155,14 +176,33 @@ void Connection::Parse(char* aData, int aAmount)
 	case NetMessage::Type::Status:
 	{
 		StatusMessage* status = reinterpret_cast<StatusMessage*>(aData);
-		if (status->myStatus == StatusMessage::Status::UserDisconnected)
+		switch (status->myStatus)
 		{
+		case StatusMessage::Status::UserDisconnected:
+		{
+
+			NetMessage temp;
+			status->myNetMessageID = temp.myNetMessageID;
 			myCallbackFunction(*status);
 		}
-		else
+			break;
+		case StatusMessage::Status::EvaluatedServer:
 		{
-			std::cout << myConnectedUser << " behaved badly and was kicked. sent status that was not disconnect\n";
+			auto key = AddrToArray(status->myAddress);
+			if (myEvaluations.count(key) != 0)
+			{
+				myEvaluations[key].myPing = status->myEvalServer.aPing;
+				myEvaluations[key].myHasResult = true;
+			}
+			EvaluateRedirectResult(false);
+		}
+			break;
+		default:
+		{
+			std::cout << myConnectedUser << " behaved badly and was kicked. sent status that was not disconnect or evaluation\n";
 			myIsValid = false;
+		}
+			break;
 		}
 	}
 	break;
@@ -172,8 +212,9 @@ void Connection::Parse(char* aData, int aAmount)
 		switch (ident->myProcessType)
 		{
 		case NetIdentify::IdentificationType::IsServer:
-			std::cout << "Server Connected\n";
-			//myAddress.sin_port = htons(ident->myIsServer.myPort);
+			myServerAddress = myAddress;
+			//myServerAddress.sin_port = ident->myIsServer.myPort;
+			std::cout << "Server on " + ReadableAddress((sockaddr*)&myAddress) + " added server to: " + std::to_string(htons(ident->myIsServer.myPort)) + " Resulting in address: " + ReadableAddress((sockaddr*)&myServerAddress) + "\n";
 			myIsServer = true;
 			break;
 		case NetIdentify::IdentificationType::IsClient:
@@ -181,7 +222,7 @@ void Connection::Parse(char* aData, int aAmount)
 			myIsServer = false;
 			NetIdentify response;
 			response.myProcessType = NetIdentify::IdentificationType::IsServer;
-			NetworkInterface::HookCallBack(response.myID, std::bind(&Connection::SendServerStatus, this));
+			NetworkInterface::HookCallBack(response.myNetMessageID, std::bind(&Connection::BeginRedirect, this));
 			Send(response);
 			break;
 		}
@@ -189,6 +230,7 @@ void Connection::Parse(char* aData, int aAmount)
 	}
 	break;
 	case NetMessage::Type::Setup:
+	case NetMessage::Type::Ping:
 		break;
 	case NetMessage::Type::Invalid:
 	default:
@@ -198,26 +240,76 @@ void Connection::Parse(char* aData, int aAmount)
 	}
 }
 
-void Connection::SendServerStatus()
+void Connection::BeginRedirect()
 {
 	std::cout << "Sending server list\n";
+	myIsRedirecting = true;
+	myPotentialRedirectCount = 0;
+	myRedirectStart = Tools::GetTotalTime();
 	std::vector<Connection*> connections = myConnectionListRequestFunction(*this);
 	for (auto& conn : connections)
 	{
 		if (conn->myIsValid && conn->myIsServer)
 		{
-			std::cout << "\t" + conn->GetName() + "\n";
+			auto key = AddrToArray(*reinterpret_cast<sockaddr*>(& conn->myServerAddress));
+			myEvaluations[key].myConnection = conn;
 			StatusMessage message;
 			message.myStatus = StatusMessage::Status::PotentialServer;
-			memcpy(&message.myServer.aAddress, &conn->myAddress, conn->myAddressSize);
-			message.myServer.aAddressSize = conn->myAddressSize;
+			memcpy(&message.myAddress, &conn->myServerAddress, sizeof(conn->myServerAddress));
+			message.myServer.aAddressSize = sizeof(conn->myServerAddress);
 			Send(message);
+			std::cout << "\t" + conn->GetName() + "\t" + ReadableAddress(&message.myAddress) + "\n";
+			++myPotentialRedirectCount;
 		}
 	}
 
 }
 
+void Connection::EvaluateRedirectResult(bool aIsTimeOutEval)
+{
+	int results = 0;
+	for (auto& i : myEvaluations)
+	{
+		if (i.second.myHasResult)
+		{
+			++results;
+		}
+	}
+	if (results >= myPotentialRedirectCount || aIsTimeOutEval)
+	{
+		std::cout << "Evaluating redirect for " + GetName() + "\n";
+		Evaluation* best = nullptr;
+		for (auto& i : myEvaluations)
+		{
+			if (!best)
+			{
+				best = &i.second;
+			}
+			if (i.second.myPing < best->myPing)
+			{
+				best = &i.second;
+			}
+		}
+		if (best)
+		{
+			std::cout << best->myConnection->GetName() + " was the best fit.\n";
+			myIsRedirecting = false;
+			StatusMessage redirect;
+			redirect.myStatus = StatusMessage::Status::ConnectToServer;
+			WIPE(redirect.myAddress);
+			memcpy(&redirect.myAddress,&best->myConnection->myServerAddress,sizeof(best->myConnection->myServerAddress));
+			Send(redirect);
+		}
+		else
+		{
+			std::cout << "could not find any functioning servers of [" + std::to_string(myPotentialRedirectCount) + "], retrying\n";
+			BeginRedirect();
+		}
+	}
+}
+
 void Connection::TimedOut()
 {
+	std::cout << GetName() + " Timed out\n";
 	myIsValid = false;
 }

@@ -3,6 +3,15 @@
 #include <functional>
 #include <NetworkInterface.h>
 
+class Connection;
+
+struct Evaluation
+{
+	Connection* myConnection;
+	float myPing;
+	bool myHasResult = false;
+};
+
 class MoveMessage;
 class StatusMessage;
 
@@ -19,9 +28,11 @@ public:
 
 	template<class T>
 	void Send(const T& aData);
-	void Send(const char* aData,int aDataSize) override;
+	void Send(const char* aData,int aDataSize, sockaddr* aCustomAddress = nullptr) override;
 	void Receive(char* someData, const int aDataSize) override;
 	void Invalidate();
+
+	void Flush();
 
 	unsigned short GetID();
 	std::string GetName();
@@ -30,12 +41,20 @@ public:
 private:
 	bool Evaluate(MoveMessage* aMessage);
 
+	float myLastUpdate;
+
 	bool HandShake(char* aData, int aAmount);
 	void Parse(char* aData, int aAmount);
 
-	void SendServerStatus();
+	void BeginRedirect();
 
+	void EvaluateRedirectResult(bool aIsTimeOutEval);
+	bool myIsRedirecting;
+	int myPotentialRedirectCount;
+	float myRedirectStart;
+	std::map<std::array<char, sizeof(sockaddr)>, Evaluation> myEvaluations;
 	bool myIsServer;
+	sockaddr_in myServerAddress;
 
 	bool myIsValid;
 	char myConnectedUser[MAXUSERNAMELENGTH];

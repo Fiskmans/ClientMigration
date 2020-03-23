@@ -16,7 +16,7 @@ RedirectServer::~RedirectServer()
 {
 }
 
-#define PORT "5763"
+#define PORT 5763
 #define CLIENTPORT 5764
 
 
@@ -83,7 +83,7 @@ void RedirectServer::StartServer()
 	hints.ai_flags = AI_PASSIVE;
 
 	// Resolve the local address and port to be used by the server
-	int iResult = getaddrinfo(NULL, PORT, &hints, &result);
+	int iResult = getaddrinfo(NULL, STRINGVALUE(PORT), &hints, &result);
 	if (iResult != 0)
 	{
 		printf("getaddrinfo failed: %d\n", iResult);
@@ -140,7 +140,7 @@ void RedirectServer::Listen()
 			{
 				StatusMessage message;
 				message.myStatus = StatusMessage::Status::UserDisconnected;
-				message.myID = cli.second.GetID();
+				message.myAssignedID = cli.second.GetID();
 				TransmitMessage(message);
 				myClients.erase(cli.first);
 				break;
@@ -152,6 +152,7 @@ void RedirectServer::Listen()
 		}
 
 		recv_len = recvfrom(mySocket, buf, BUFLEN, 0, reinterpret_cast<sockaddr*>(&si_other), &slen);
+
 
 		char addressBuffer[512];
 		InetNtopA(AF_INET, &si_other, addressBuffer, 512);
@@ -167,6 +168,11 @@ void RedirectServer::Listen()
 			std::cout << "Could not recvieve data from client(s): " + std::to_string(WSAGetLastError()) + " ip: " + key + "\n";
 			myClients[key].Invalidate();
 			continue;
+		}
+		NetMessage* message = reinterpret_cast<NetMessage*>(buf);
+		if (message->myType == NetMessage::Type::Ping)
+		{
+			std::cout << "I Was pinged\n";
 		}
 		auto it = myClients.find(key);
 		if (it == myClients.end())
@@ -194,10 +200,10 @@ void RedirectServer::TransmitMessage(const NetMessage& aMessage)
 		{
 		case StatusMessage::Status::UserConnected:
 		{
-			std::cout << "Telling all clients that [" << status.myUsername << "] has connected on id [" + std::to_string(status.myID) + "]\n";
+			std::cout << "Telling all clients that [" << status.myUsername << "] has connected on id [" + std::to_string(status.myAssignedID) + "]\n";
 			for (auto& it : myClients)
 			{
-				if (it.second.GetID() == status.myID)
+				if (it.second.GetID() == status.myAssignedID)
 				{
 					for (auto& cli : myClients)
 					{
@@ -206,7 +212,7 @@ void RedirectServer::TransmitMessage(const NetMessage& aMessage)
 							StatusMessage userStatus;
 							userStatus.SetName(cli.second.GetName());
 							userStatus.myStatus = StatusMessage::Status::UserOnline;
-							userStatus.myID = cli.second.GetID();
+							userStatus.myAssignedID = cli.second.GetID();
 							it.second.Send(userStatus);
 						}
 					}
@@ -224,7 +230,7 @@ void RedirectServer::TransmitMessage(const NetMessage& aMessage)
 			std::cout << "Telling all clients that [";
 			for (auto& i : myClients)
 			{
-				if (i.second.GetID() == status.myID)
+				if (i.second.GetID() == status.myAssignedID)
 				{
 					std::cout << i.second.GetName();
 				}
@@ -232,7 +238,7 @@ void RedirectServer::TransmitMessage(const NetMessage& aMessage)
 			std::cout << "] has disconnected.\n";
 			for (auto& it : myClients)
 			{
-				if (it.second.GetID() != status.myID)
+				if (it.second.GetID() != status.myAssignedID)
 				{
 					it.second.Send(status);
 				}

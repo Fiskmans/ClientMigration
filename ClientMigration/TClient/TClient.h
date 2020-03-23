@@ -23,7 +23,7 @@ public:
 	void Disconnect();
 
 	template<class T>
-	void Send(const T& aMessage);
+	void Send(const T& aMessage,sockaddr* aCustomAddress = nullptr);
 
 	void SetCallback(std::function<void(NetMessage&)> aFunction);
 	void Flush();
@@ -32,12 +32,12 @@ public:
 
 
 	void Receive(char* someData, const int aDataSize) override;
-	void Send(const char* someData, const int aDataSize) override;
+	void Send(const char* someData, const int aDataSize, sockaddr* aCustomAddress = nullptr) override;
 
 private:
-	std::variant<int, std::string> SelectServer();
-	std::vector<sockaddr_in> myServers;
-	std::mutex myServerMutex;
+
+	void EvaluateServer(sockaddr aAddress);
+	std::map<std::array<char,sizeof(sockaddr)>,float> myServerEval;
 
 	char myBuffer[MAXBUFFERSIZE];
 	short myPackageSize[MAXBUFFERCOUNT];
@@ -63,7 +63,7 @@ private:
 };
 
 template<class T>
-inline void NetworkClient::Send(const T& aMessage)
+inline void NetworkClient::Send(const T& aMessage, sockaddr* aCustomAddress)
 {
-	NetworkInterface::PreProcessAndSend(const_cast<NetMessage*>(reinterpret_cast<const NetMessage*>(&aMessage)), sizeof(aMessage));
+	NetworkInterface::PreProcessAndSend(const_cast<NetMessage*>(reinterpret_cast<const NetMessage*>(&aMessage)), sizeof(aMessage),aCustomAddress);
 }

@@ -49,6 +49,8 @@
     <ClInclude Include="NetworkHelpers.h" />
     <ClInclude Include="NetIdentify.h" />
     <ClInclude Include="EasyAssignString.h" />
+    <ClInclude Include="PingMessage.h" />
+    <ClInclude Include="ClipBoardHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -80,5 +82,7 @@
     <ClCompile Include="NetworkHelpers.cpp" />
     <ClCompile Include="NetIdentify.cpp" />
     <ClCompile Include="EasyAssignString.cpp" />
+    <ClCompile Include="PingMessage.cpp" />
+    <ClCompile Include="ClipBoardHelper.cpp" />
   </ItemGroup>
 </Project>

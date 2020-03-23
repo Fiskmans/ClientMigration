@@ -90,9 +90,11 @@
     <ClInclude Include="..\Precompiled\Macros.h" />
     <ClInclude Include="..\Precompiled\pch.h" />
     <ClInclude Include="BigFileMessage.h" />
+    <ClInclude Include="ClipBoardHelper.h" />
     <ClInclude Include="EasyAssignString.h" />
     <ClInclude Include="NetIdentify.h" />
     <ClInclude Include="NetworkHelpers.h" />
+    <ClInclude Include="PingMessage.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="CommonNetworkIncludes.h" />
     <ClInclude Include="AllNetMesseges.h" />
@@ -108,9 +110,11 @@
   <ItemGroup>
     <ClCompile Include="..\Precompiled\pch.cpp" />
     <ClCompile Include="BigFileMessage.cpp" />
+    <ClCompile Include="ClipBoardHelper.cpp" />
     <ClCompile Include="EasyAssignString.cpp" />
     <ClCompile Include="NetIdentify.cpp" />
     <ClCompile Include="NetworkHelpers.cpp" />
+    <ClCompile Include="PingMessage.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="NetMessage.cpp" />
     <ClCompile Include="NetPackResponse.cpp" />

@@ -11,7 +11,7 @@ namespace IdentificationTypes
 	struct IsServer
 	{
 		EasyAssignString<128> myName;
-		short myPort;
+		unsigned short myPort;
 	};
 
 	struct IsClient

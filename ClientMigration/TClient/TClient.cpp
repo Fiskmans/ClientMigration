@@ -10,6 +10,7 @@
 #include "TimeHelper.h"
 #include <NetworkHelpers.h>
 #include <NetIdentify.h>
+#include <PingMessage.h>
 
 #define BUFLEN 576
 #define SERVERPORT 5763
@@ -76,6 +77,10 @@ void InsertLine(const std::string& aLine)
 
 NetworkClient::NetworkClient()
 {
+	for (size_t i = 0; i < 3; i++)
+	{
+		Tools::GetTotalTime();
+	}
 	Flush();
 }
 
@@ -176,7 +181,7 @@ void NetworkClient::HandShake()
 
 	myName = username;
 
-	std::cout << "Starting Handshake\n";
+	std::cout << "Starting Handshake " + ReadableAddress((sockaddr*)&myTargetAddress) + "\n";
 	while (!myIsConnected)
 	{
 		std::cout << "Sending Handshake package\n";
@@ -250,10 +255,18 @@ void NetworkClient::TimedOut()
 void NetworkClient::Disconnect()
 {
 	StatusMessage message;
-	message.myID = myId;
+	message.myAssignedID = myId;
 	message.myStatus = StatusMessage::Status::UserDisconnected;
 	int slen = sizeof(myTargetAddress);
-	SimpleSend(mySocket, message, 0, (struct sockaddr*) & myTargetAddress, slen);
+	bool done = false;
+	NetworkInterface::HookCallBack(message.myNetMessageID, [&](NetMessageIdType id) { done = true; });
+	PreProcessAndSend(&message,sizeof(message));
+
+	while (!done)
+	{
+		Flush();
+		std::this_thread::yield();
+	}
 	std::cout << "Bye-bye! :wave:\n";
 	isRunning = false;
 }
@@ -335,12 +348,46 @@ const std::string& NetworkClient::GetName() const
 	return myName;
 }
 
-void NetworkClient::Send(const char* someData, const int aDataSize)
+void NetworkClient::Send(const char* someData, const int aDataSize, sockaddr* aCustomAddress)
 {
-	memcpy(myBufferStart, someData, aDataSize);
-	*myPackageStart = aDataSize;
-	myBufferStart += *myPackageStart;
-	++myPackageStart;
+	if (aCustomAddress)
+	{
+		sendto(mySocket, someData, aDataSize,0, aCustomAddress, sizeof(*aCustomAddress));
+		std::cout << "Client sent package to custom address: " + ReadableAddress(aCustomAddress) + "\n";
+	}
+	else
+	{
+		memcpy(myBufferStart, someData, aDataSize);
+		*myPackageStart = aDataSize;
+		myBufferStart += *myPackageStart;
+		++myPackageStart;
+	}
+}
+
+std::array<char, sizeof(sockaddr)> AddrToArray(sockaddr aAddress)
+{
+	return *reinterpret_cast<std::array<char, sizeof(sockaddr)>*>(&aAddress);
+}
+
+void NetworkClient::EvaluateServer(sockaddr aAddress)
+{
+	std::cout << "Evaluating server with ip: " + ReadableAddress(&aAddress) + "\n";
+
+	PingMessage message;
+	float now = Tools::GetTotalTime();
+	NetworkInterface::HookCallBack(message.myNetMessageID, [this, aAddress,now](NetMessageIdType) 
+		{ 
+			auto key = AddrToArray(aAddress);
+			float ping = Tools::GetTotalTime() - now;
+			myServerEval[key] = ping;
+			std::cout << "Server pinged in " + std::to_string(ping) + " seconds\n";
+			StatusMessage response;
+			response.myStatus = StatusMessage::Status::EvaluatedServer;
+			response.myAddress = aAddress;
+			response.myEvalServer.aPing = ping;
+			Send(response);
+		});
+	Send(message,&aAddress);
 }
 
 void NetworkClient::Receive(char* someData, const int aDataSize)
@@ -357,8 +404,13 @@ void NetworkClient::Receive(char* someData, const int aDataSize)
 			StatusMessage* status = reinterpret_cast<StatusMessage*>(netMess);
 			if (status->myStatus == StatusMessage::Status::PotentialServer)
 			{
-				memset(&myTargetAddress, 0, sizeof(myTargetAddress));
-				memcpy(&myTargetAddress, &status->myServer.aAddress, status->myServer.aAddressSize);
+				EvaluateServer(status->myAddress);
+			}
+			if (status->myStatus == StatusMessage::Status::ConnectToServer)
+			{
+				std::cout << "Redirecting to: " + ReadableAddress(&status->myAddress) + "\n";
+
+				memcpy(&myTargetAddress, &status->myAddress, sizeof(sockaddr));
 				HandShake();
 			}
 		}

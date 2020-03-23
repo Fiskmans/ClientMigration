@@ -82,3 +82,25 @@ bool TranslateAddress(const std::string& aAddress, sockaddr* aAddressTarget, boo
 	aPrinter("Address parsing done",false);
 	return true;
 }
+
+std::string ReadableAddress(sockaddr* aAddress)
+{
+
+	std::string out;
+
+	using namespace std::string_literals;
+
+	char addBuf[INET6_ADDRSTRLEN];
+	if (inet_ntop(((sockaddr_in*)aAddress)->sin_family, &((sockaddr_in*)aAddress)->sin_addr, addBuf, INET6_ADDRSTRLEN) != NULL)
+	{
+		out += addBuf;
+	}
+	else
+	{
+		out += "[Could not translate address]";
+	}
+
+	out += ":" + std::to_string(htons(((sockaddr_in*)aAddress)->sin_port));
+
+	return out;
+}

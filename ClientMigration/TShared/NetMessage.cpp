@@ -12,6 +12,7 @@ bool NetMessage::IsImportant() const
 	case NetMessage::Type::Setup:
 	case NetMessage::Type::BigFile:
 	case NetMessage::Type::Identify:
+	case NetMessage::Type::Ping:
 		return true;
 	default:
 		return false;
