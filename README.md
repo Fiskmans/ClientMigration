@@ -28,31 +28,31 @@ __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress 
 
 ~__17/03 tisdag:__	Få klienten att koppla upp sig till ett domännamn och få en koppling till en server som kör på min hemdator~
 
-~__18/03 onsdag:__	 Sätta upp en simpel redirekt server och koppla upp klienten via den istället~
+~__18/03 onsdag:__	 Sätta upp en simpel redirekt server och koppla upp klienten via den istället~ Buggfixing/bufferdag ’Vad är det här!?’, ’Vad gjorde jag här!?’, ’Varför gjorde jag så!?’ eller liknande kommentarer kan förekomma
 
-__19/03 torsdag:__	Buggfixing/bufferdag ’Vad är det här!?’, ’Vad gjorde jag här!?’, ’Varför gjorde jag så!?’ eller liknande kommentarer kan förekomma
+__19/03 torsdag:__		Utöka redirekt servern så den kan ha flera ’spel’servrar uppkopplade och välja mellan dem. Etablerara ett sätt för ’spel’serverna att rapportera sin status till ’router’ servern och ett sätt för klienter att generera en låtsas ’load’, filöverföring data subscription el.dyl
 
-__23/03 måndag:__	Utöka redirekt servern så den kan ha flera ’spel’servrar uppkopplade och välja mellan dem.
+__23/03 måndag:__ Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad dataFå en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server
 
-__24/03 tisdag:__	etablerara ett sätt för ’spel’serverna att rapportera sin status till ’router’ servern och ett sätt för klienter att generera en låtsas ’load’, filöverföring data subscription el.dyl
 
-__25/03 onsdag:__	Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad data
+__24/03 tisdag:__		Buggfixing/bufferdag Få servar att dela belastning om en ny server kopplar upp sig
 
-__26/03 torsdag:__	Få en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server
+__25/03 onsdag:__		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Komposit routing eller Hemsida/portfolio
 
-__30/04 måndag:__	Buggfixing/bufferdag
+__26/03 torsdag:__		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
+__30/04 måndag:__ Bufferdag för Grafana eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
 
-__31/04 tisdag:__	Få servar att dela belastning om en ny server kopplar upp sig
+__31/04 tisdag:__	
 
-__01/04 onsdag:__	Bufferdag för Komposit routing eller Hemsida/portfolio
+__01/04 onsdag:__
 
-__02/04 torsdag:__	Bufferdag för Komposit routing eller Hemsida/portfolio
+__02/04 torsdag:__	
 
-__06/04 måndag:__	Bufferdag för Komposit routing eller Hemsida/portfolio
+__06/04 måndag:__
 
-__07/04 tisdag:__	Bufferdag för Grafana eller Hemsida/portfolio
+__07/04 tisdag:__	
 
-__08/04 onsdag:__	Bufferdag för Grafana eller Hemsida/portfolio
+__08/04 onsdag:__	
 
-__09/04 torsdag:__	Bufferdag för Grafana eller Hemsida/portfolio
+__09/04 torsdag:__	
 
