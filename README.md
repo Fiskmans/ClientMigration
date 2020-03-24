@@ -30,9 +30,9 @@ __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress 
 
 ~__18/03 onsdag:__	 Sätta upp en simpel redirekt server och koppla upp klienten via den istället Buggfixing/bufferdag ’Vad är det här!?’, ’Vad gjorde jag här!?’, ’Varför gjorde jag så!?’ eller liknande kommentarer kan förekomma~
 
-~__19/03 torsdag:__~		~Utöka redirekt servern så den kan ha flera ’spel’servrar uppkopplade och välja mellan dem.~ Etablerara ett sätt för ’spel’serverna att rapportera sin status till ’router’ servern och ett sätt för klienter att generera en låtsas ’load’, filöverföring data subscription el.dyl
+~__19/03 torsdag:__~		~Utöka redirekt servern så den kan ha flera ’spel’servrar uppkopplade och välja mellan dem. Etablerara ett sätt för ’spel’serverna att rapportera sin status till ’router’ servern och ett sätt för klienter att generera en låtsas ’load’, filöverföring data subscription el.dyl~
 
-~__20/03 fredag:__~ Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad dataFå en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server
+~__20/03 fredag:__~ Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad data. Få en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server
 
 ~__23/03 måndag:__~ Buggfixing/bufferdag Få servar att dela belastning om en ny server kopplar upp sig
 
