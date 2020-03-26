@@ -36,9 +36,9 @@ __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress 
 
 ~__23/03 måndag:__~ Buggfixing/bufferdag Få servar att dela belastning om en ny server kopplar upp sig
 
-__24/03 tisdag:__		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Komposit routing eller Hemsida/portfolio
+~__24/03 tisdag:__~		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Komposit routing eller Hemsida/portfolio
 
-__25/03 onsdag:__		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
+~__25/03 onsdag:__~ 		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
 
 __26/03 torsdag:__		Bufferdag för Grafana eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
 
