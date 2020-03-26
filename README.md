@@ -32,7 +32,7 @@ __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress 
 
 ~__19/03 torsdag:__~		~Utöka redirekt servern så den kan ha flera ’spel’servrar uppkopplade och välja mellan dem. Etablerara ett sätt för ’spel’serverna att rapportera sin status till ’router’ servern och ett sätt för klienter att generera en låtsas ’load’, filöverföring data subscription el.dyl~
 
-~__20/03 fredag:__~ Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad data. Få en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server
+~__20/03 fredag:__ Kopiera en klients data från en server till en annan via ’router’ servern och sen låta en klient koppla upp sig till den andra servern med redan etablerad data. Få en server att migrera en klient genom att först skicka dens data sen be den koppla om sig till en annan server~
 
 ~__23/03 måndag:__~ Buggfixing/bufferdag Få servar att dela belastning om en ny server kopplar upp sig
 
@@ -40,7 +40,7 @@ __16/03 måndag:__	~om dns är simpelt nog, koppla domänen till min hemaddress 
 
 ~__25/03 onsdag:__~ 		Bufferdag för Komposit routing eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
 
-__26/03 torsdag:__		Bufferdag för Grafana eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
+~__26/03 torsdag:__~		Bufferdag för Grafana eller Hemsida/portfolio Bufferdag för Grafana eller Hemsida/portfolio
 
 __27/03 fredag:__ Oplanerad
 
